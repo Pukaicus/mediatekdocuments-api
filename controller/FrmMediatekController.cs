@@ -96,5 +96,45 @@ namespace MediaTekDocuments.controller
         {
             return access.CreerExemplaire(exemplaire);
         }
+
+        /// <summary>
+        /// Supprime un livre dans la bdd
+        /// </summary>
+        /// <param name="livre">L'objet Livre à supprimer</param>
+        /// <returns>True si la suppression a pu se faire</returns>
+        public bool SupprimerLivre(Livre livre)
+        {
+            return access.SupprimerEntite("livre", livre);
+        }
+
+        /// <summary>
+        /// Crée un livre dans la bdd
+        /// </summary>
+        /// <param name="livre">L'objet Livre à créer</param>
+        /// <returns>True si la création a pu se faire</returns>
+        public bool CreerLivre(Livre livre)
+        {
+            return access.CreerEntite("livre", livre);
+        }
+
+        /// <summary>
+        /// Modifie un livre dans la bdd
+        /// </summary>
+        /// <param name="livre">L'objet Livre à modifier</param>
+        /// <returns>True si la modification a pu se faire</returns>
+        public bool ModifierLivre(Livre livre)
+        {
+            return access.ModifierEntite("livre", livre);
+        }
+
+        // --- GESTION DES DVD ---
+        public bool CreerDvd(Dvd dvd) => access.CreerEntite("dvd", dvd);
+        public bool ModifierDvd(Dvd dvd) => access.ModifierEntite("dvd", dvd);
+        public bool SupprimerDvd(Dvd dvd) => access.SupprimerEntite("dvd", dvd);
+
+        // --- GESTION DES REVUES ---
+        public bool CreerRevue(Revue revue) => access.CreerEntite("revue", revue);
+        public bool ModifierRevue(Revue revue) => access.ModifierEntite("revue", revue);
+        public bool SupprimerRevue(Revue revue) => access.SupprimerEntite("revue", revue);
     }
 }

@@ -33,6 +33,9 @@ namespace MediaTekDocuments.view
             this.tabLivres = new System.Windows.Forms.TabPage();
             this.grpLivresInfos = new System.Windows.Forms.GroupBox();
             this.label59 = new System.Windows.Forms.Label();
+            this.btnLivresAjouter = new System.Windows.Forms.Button();
+            this.btnLivresModifier = new System.Windows.Forms.Button();
+            this.btnLivresSupprimer = new System.Windows.Forms.Button();
             this.txbLivresIsbn = new System.Windows.Forms.TextBox();
             this.txbLivresImage = new System.Windows.Forms.TextBox();
             this.txbLivresRayon = new System.Windows.Forms.TextBox();
@@ -494,6 +497,36 @@ namespace MediaTekDocuments.view
             this.btnLivresNumRecherche.Text = "Rechercher";
             this.btnLivresNumRecherche.UseVisualStyleBackColor = true;
             this.btnLivresNumRecherche.Click += new System.EventHandler(this.BtnLivresNumRecherche_Click);
+
+            // btnLivresAjouter
+            this.btnLivresAjouter.Location = new System.Drawing.Point(450, 450);
+            this.btnLivresAjouter.Name = "btnLivresAjouter";
+            this.btnLivresAjouter.Size = new System.Drawing.Size(100, 30);
+            this.btnLivresAjouter.Text = "Ajouter";
+            this.btnLivresAjouter.UseVisualStyleBackColor = true;
+            this.btnLivresAjouter.Click += new System.EventHandler(this.btnLivresAjouter_Click);
+
+            // btnLivresModifier
+            this.btnLivresModifier.Location = new System.Drawing.Point(560, 450);
+            this.btnLivresModifier.Name = "btnLivresModifier";
+            this.btnLivresModifier.Size = new System.Drawing.Size(100, 30);
+            this.btnLivresModifier.Text = "Modifier";
+            this.btnLivresModifier.UseVisualStyleBackColor = true;
+            this.btnLivresModifier.Click += new System.EventHandler(this.btnLivresModifier_Click);
+
+            // btnLivresSupprimer
+            this.btnLivresSupprimer.Location = new System.Drawing.Point(670, 450);
+            this.btnLivresSupprimer.Name = "btnLivresSupprimer";
+            this.btnLivresSupprimer.Size = new System.Drawing.Size(100, 30);
+            this.btnLivresSupprimer.Text = "Supprimer";
+            this.btnLivresSupprimer.UseVisualStyleBackColor = true;
+            this.btnLivresSupprimer.Click += new System.EventHandler(this.btnLivresSupprimer_Click);
+
+            // AJOUTER AU PANNEAU
+            this.tabLivres.Controls.Add(this.btnLivresAjouter);
+            this.tabLivres.Controls.Add(this.btnLivresModifier);
+            this.tabLivres.Controls.Add(this.btnLivresSupprimer);
+
             // 
             // label5
             // 
@@ -1970,6 +2003,9 @@ namespace MediaTekDocuments.view
         private System.Windows.Forms.Label label57;
         private System.Windows.Forms.Label label58;
         private System.Windows.Forms.Label label59;
+        private System.Windows.Forms.Button btnLivresAjouter;
+        private System.Windows.Forms.Button btnLivresModifier;
+        private System.Windows.Forms.Button btnLivresSupprimer;
     }
 }
 

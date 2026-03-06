@@ -62,7 +62,10 @@
     <Compile Include="view\FrmMediatek.Designer.cs">
       <DependentUpon>FrmMediatek.cs</DependentUpon>
     </Compile>
+    <Compile Include="model\Abonnement.cs" />
     <Compile Include="model\Categorie.cs" />
+    <Compile Include="model\Commande.cs" />
+    <Compile Include="model\CommandeDocument.cs" />
     <Compile Include="model\Document.cs" />
     <Compile Include="model\Dvd.cs" />
     <Compile Include="model\Etat.cs" />
@@ -73,6 +76,7 @@
     <Compile Include="model\Public.cs" />
     <Compile Include="model\Rayon.cs" />
     <Compile Include="model\Revue.cs" />
+    <Compile Include="model\Suivi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

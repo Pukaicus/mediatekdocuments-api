@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Bibliothécaire" as B
+
+rectangle "Système de Gestion des Commandes" {
+  usecase "Consulter les commandes d'un livre/DVD" as UC1
+  usecase "Passer une nouvelle commande" as UC2
+  usecase "Modifier l'étape de suivi" as UC3
+  usecase "Supprimer une commande" as UC4
+  
+  note right of UC2 : État initial forcé à 'En cours'
+  note bottom of UC3 : Respect des règles de progression\n(ex: pas de retour arrière si livrée)
+  note bottom of UC4 : Uniquement si non livrée
+}
+
+B -- UC1
+B -- UC2
+B -- UC3
+B -- UC4
+
+@enduml

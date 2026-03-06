@@ -37,6 +37,8 @@ namespace MediaTekDocuments.dal
         private const string POST = "POST";
         /// <summary>
         /// méthode HTTP pour update
+        
+        private const string CHAMPS = "champs=";
 
         /// <summary>
         /// Méthode privée pour créer un singleton
@@ -132,6 +134,55 @@ namespace MediaTekDocuments.dal
 
 
         /// <summary>
+        /// Retourne un livre spécifique ou tous les livres si id est vide
+        /// </summary>
+        public List<Livre> GetLivre(string id)
+        {
+            return TraitementRecup<Livre>(GET, "livre/" + id, null);
+        }
+
+        /// <summary>
+        /// Retourne un DVD spécifique ou tous les DVD si id est vide
+        /// </summary>
+        public List<Dvd> GetDvd(string id)
+        {
+            return TraitementRecup<Dvd>(GET, "dvd/" + id, null);
+        }
+
+        /// <summary>
+        /// Retourne une revue spécifique ou toutes les revues si id est vide
+        /// </summary>
+        public List<Revue> GetRevue(string id)
+        {
+            return TraitementRecup<Revue>(GET, "revue/" + id, null);
+        }
+
+        /// <summary>
+        /// Récupère les abonnements d'une revue
+        /// </summary>
+        public List<Abonnement> GetAbonnements(string idRevue)
+        {
+            return TraitementRecup<Abonnement>(GET, "abonnement/" + idRevue, null);
+        }
+
+        /// <summary>
+        /// Récupère les abonnements arrivant à échéance sous 30 jours
+        /// </summary>
+        public List<Abonnement> GetAbonnementsEcheance()
+        {
+            return TraitementRecup<Abonnement>(GET, "abonnements_echeance", null);
+        }
+
+        // --- ALIAS POUR LES ACTIONS (DVD/REVUES) ---
+        public bool CreerDvd(Dvd dvd) => CreerEntite("dvd", dvd);
+        public bool ModifierDvd(Dvd dvd) => ModifierEntite("dvd", dvd);
+        public bool SupprimerDvd(Dvd dvd) => SupprimerEntite("dvd", dvd);
+        public bool CreerRevue(Revue revue) => CreerEntite("revue", revue);
+        public bool ModifierRevue(Revue revue) => ModifierEntite("revue", revue);
+        public bool SupprimerRevue(Revue revue) => SupprimerEntite("revue", revue);
+
+
+        /// <summary>
         /// Retourne les exemplaires d'une revue
         /// </summary>
         /// <param name="idDocument">id de la revue concernée</param>
@@ -153,7 +204,87 @@ namespace MediaTekDocuments.dal
             String jsonExemplaire = JsonConvert.SerializeObject(exemplaire, new CustomDateTimeConverter());
             try
             {
-                List<Exemplaire> liste = TraitementRecup<Exemplaire>(POST, "exemplaire", "champs=" + jsonExemplaire);
+                List<Exemplaire> liste = TraitementRecup<Exemplaire>(POST, "exemplaire", CHAMPS + jsonExemplaire);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Récupère toutes les étapes de suivi à partir de la BDD
+        /// </summary>
+        /// <returns>Liste d'objets Suivi</returns>
+        public List<Suivi> GetAllSuivi()
+        {
+            List<Suivi> lesSuivis = TraitementRecup<Suivi>(GET, "suivi", null);
+            return lesSuivis;
+        }
+
+        /// <summary>
+        /// Récupère les commandes d'un document (livre ou dvd)
+        /// </summary>
+        /// <param name="idDocument">id du document concerné</param>
+        /// <returns>Liste d'objets CommandeDocument</returns>
+        public List<CommandeDocument> GetCommandesDocument(string idDocument)
+        {
+            List<CommandeDocument> lesCommandes = TraitementRecup<CommandeDocument>(GET, "commandedocument/" + idDocument, null);
+            return lesCommandes;
+        }
+
+        /// <summary>
+        /// Envoi d'une demande de création d'une entité
+        /// </summary>
+        public bool CreerEntite<T>(String table, T objet)
+        {
+            String jsonObjet = JsonConvert.SerializeObject(objet, new CustomDateTimeConverter());
+            try
+            {
+                List<T> liste = TraitementRecup<T>(POST, table, CHAMPS + jsonObjet);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Envoi d'une demande de modification d'une entité
+        /// </summary>
+        public bool ModifierEntite<T>(String table, T objet)
+        {
+            // Récupération de l'id pour l'URL
+            JObject json = JObject.FromObject(objet);
+            String id = (String)json["Id"];
+            String jsonObjet = JsonConvert.SerializeObject(objet, new CustomDateTimeConverter());
+            try
+            {
+                List<T> liste = TraitementRecup<T>(POST, table + "/" + id, CHAMPS + jsonObjet);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Envoi d'une demande de suppression d'une entité
+        /// </summary>
+        public bool SupprimerEntite<T>(String table, T objet)
+        {
+            JObject json = JObject.FromObject(objet);
+            String id = (String)json["Id"];
+            String jsonId = convertToJson("id", id);
+            try
+            {
+                List<T> liste = TraitementRecup<T>(POST, "suppr" + table, CHAMPS + jsonId);
                 return (liste != null);
             }
             catch (Exception ex)
@@ -208,7 +339,7 @@ namespace MediaTekDocuments.dal
         /// <param name="nom"></param>
         /// <param name="valeur"></param>
         /// <returns>couple au format json</returns>
-        private String convertToJson(Object nom, Object valeur)
+        private static string convertToJson(Object nom, Object valeur)
         {
             Dictionary<Object, Object> dictionary = new Dictionary<Object, Object>();
             dictionary.Add(nom, valeur);

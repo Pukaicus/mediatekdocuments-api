@@ -2,25 +2,23 @@
 
 namespace MediaTekDocuments.model
 {
-    /// <summary>
-    /// Classe métier Exemplaire (exemplaire d'une revue)
-    /// </summary>
     public class Exemplaire
     {
         public int Numero { get; set; }
+        public DateTime DateReception { get; set; }
         public string Photo { get; set; }
-        public DateTime DateAchat { get; set; }
         public string IdEtat { get; set; }
-        public string Id { get; set; }
+        public string IdDocument { get; set; }
+        public DateTime DateAchat { get; set; }
 
-        public Exemplaire(int numero, DateTime dateAchat, string photo, string idEtat, string idDocument)
+        public Exemplaire(int numero, DateTime dateReception, string photo, string idEtat, string idDocument, DateTime dateAchat)
         {
             this.Numero = numero;
-            this.DateAchat = dateAchat;
+            this.DateReception = dateReception;
             this.Photo = photo;
             this.IdEtat = idEtat;
-            this.Id = idDocument;
+            this.IdDocument = idDocument;
+            this.DateAchat = dateAchat;
         }
-
     }
 }

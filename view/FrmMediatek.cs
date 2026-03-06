@@ -15,14 +15,46 @@ namespace MediaTekDocuments.view
     /// </summary>
     public partial class FrmMediatek : Form
     {
+        private const string MSG_INTROUVABLE = "Information non trouvée";
         private const string ETAT_AJOUTER = "Ajouter";
         private const string ETAT_ENREGISTRER = "Enregistrer";
         private const string ETAT_MODIFIER = "Modifier";
+        private const string STR_MONTANT = "Montant";
+        private const string STR_SUIVI = "Suivi";
+        private const string STR_CONFIRMATION = "Confirmation";
+        private const string STR_ENREGISTRER = "Enregistrer";
         #region Commun
         private readonly FrmMediatekController controller;
+        private TabPage tabCommandesLivres;
+        private DataGridView dgvComLivres;
+        private TextBox txbComLivresNum;
+        private GroupBox grpComLivresSaisie;
+        private NumericUpDown nudComLivresQuantite;
+        private TextBox txbComLivresMontant;
+        private ComboBox cbxComLivresSuivi;
+        private Button btnComLivresAjouter;
         private readonly BindingSource bdgGenres = new BindingSource();
         private readonly BindingSource bdgPublics = new BindingSource();
         private readonly BindingSource bdgRayons = new BindingSource();
+        private Label lblComLivresInfos;
+        private TabPage tabCommandesDvd;
+        private DataGridView dgvComDvd;
+        private TextBox txbComDvdNum;
+        private Label lblComDvdInfos;
+        private GroupBox grpComDvdSaisie;
+        private TextBox txbComDvdMontant;
+        private NumericUpDown nudComDvdQuantite;
+        private ComboBox cbxComDvdSuivi;
+        private Button btnComDvdAjouter;
+        private TabPage tabCommandesRevues;
+        private DataGridView dgvComRevues;
+        private TextBox txbComRevuesNum;
+        private Label lblComRevuesInfos;
+        private GroupBox grpComRevuesSaisie;
+        private DateTimePicker dtpComRevuesDate;
+        private TextBox txbComRevuesMontant;
+        private DateTimePicker dtpComRevuesFin;
+        private Button btnComRevuesAjouter;
 
         /// <summary>
         /// Constructeur : création du contrôleur lié à ce formulaire
@@ -31,7 +63,477 @@ namespace MediaTekDocuments.view
         {
             InitializeComponent();
             this.controller = new FrmMediatekController();
+            InitCommandesLivres();
+            InitCommandesDvd();
+            InitCommandesRevues();
+            AlerteFinAbonnements();
         }
+
+        /// <summary>
+        /// Initialisation complète de l'onglet des commandes de livres
+        /// </summary>
+        private void InitCommandesLivres()
+        {
+            tabCommandesLivres = new TabPage("Commandes de livres");
+            tabPrincipal.TabPages.Add(tabCommandesLivres); 
+
+            Label lblNum = new Label { Text = "Numéro livre :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
+            txbComLivresNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
+            Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
+            
+            lblComLivresInfos = new Label { Text = "Informations livre : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            
+            btnRechercher.Click += (s, e) => { ChargerCommandesLivre(txbComLivresNum.Text); };
+
+            dgvComLivres = new DataGridView {
+                Location = new System.Drawing.Point(20, 60),
+                Size = new System.Drawing.Size(450, 300),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            };
+            dgvComLivres.Columns.Add("Date", "Date");
+            dgvComLivres.Columns.Add(STR_MONTANT, STR_MONTANT);
+            dgvComLivres.Columns.Add("Quantite", "Quantité");
+            dgvComLivres.Columns.Add(STR_SUIVI, STR_SUIVI);
+
+            grpComLivresSaisie = new GroupBox { Text = "Gestion de la commande", Location = new System.Drawing.Point(500, 60), Size = new System.Drawing.Size(280, 300) };
+            
+            Label lblMontant = new Label { Text = "Montant :", Location = new System.Drawing.Point(10, 30), Width = 70 };
+            txbComLivresMontant = new TextBox { Location = new System.Drawing.Point(90, 27), Width = 100 };
+            Label lblQuantite = new Label { Text = "Quantité :", Location = new System.Drawing.Point(10, 70), Width = 70 };
+            nudComLivresQuantite = new NumericUpDown { Location = new System.Drawing.Point(90, 67), Width = 60, Minimum = 1 };
+            btnComLivresAjouter = new Button { Text = STR_ENREGISTRER, Location = new System.Drawing.Point(10, 110), Width = 100 };
+            btnComLivresAjouter.Click += (s, e) => { EnregistrerNouvelleCommande(); };
+
+            Label lblSuivi = new Label { Text = "Nouvel état :", Location = new System.Drawing.Point(10, 160), Width = 80 };
+            cbxComLivresSuivi = new ComboBox { Location = new System.Drawing.Point(100, 157), Width = 150, DropDownStyle = ComboBoxStyle.DropDownList };
+            cbxComLivresSuivi.DataSource = controller.GetAllSuivi();
+            cbxComLivresSuivi.DisplayMember = "Libelle";
+            Button btnModifierSuivi = new Button { Text = "Changer l'état", Location = new System.Drawing.Point(100, 190), Width = 100 };
+            btnModifierSuivi.Click += (s, e) => { ModifierSuiviCommande(); };
+
+            Button btnSupprimerCom = new Button { Text = "Supprimer", Location = new System.Drawing.Point(10, 250), Width = 100, BackColor = System.Drawing.Color.LightCoral };
+            btnSupprimerCom.Click += (s, e) => { SupprimerCommande(); };
+
+            grpComLivresSaisie.Controls.Add(lblMontant);
+            grpComLivresSaisie.Controls.Add(txbComLivresMontant);
+            grpComLivresSaisie.Controls.Add(lblQuantite);
+            grpComLivresSaisie.Controls.Add(nudComLivresQuantite);
+            grpComLivresSaisie.Controls.Add(btnComLivresAjouter);
+            grpComLivresSaisie.Controls.Add(lblSuivi);
+            grpComLivresSaisie.Controls.Add(cbxComLivresSuivi);
+            grpComLivresSaisie.Controls.Add(btnModifierSuivi);
+            grpComLivresSaisie.Controls.Add(btnSupprimerCom);
+
+            tabCommandesLivres.Controls.Add(lblNum);
+            tabCommandesLivres.Controls.Add(txbComLivresNum);
+            tabCommandesLivres.Controls.Add(btnRechercher);
+            tabCommandesLivres.Controls.Add(lblComLivresInfos);
+            tabCommandesLivres.Controls.Add(dgvComLivres);
+            tabCommandesLivres.Controls.Add(grpComLivresSaisie);
+        }
+
+        /// <summary>
+        /// Les commandes et les infos du livre
+        /// </summary>
+        private void ChargerCommandesLivre(string idLivre)
+        {
+            Livre leLivre = controller.GetLivre(idLivre);
+            if (leLivre != null)
+            {
+                lblComLivresInfos.Text = $"Livre : {leLivre.Titre} - {leLivre.Auteur}";
+                
+                List<CommandeDocument> lesCommandes = controller.GetCommandesDocument(idLivre);
+                
+                dgvComLivres.DataSource = lesCommandes;
+            }
+            else
+            {
+                MessageBox.Show("Numéro de livre introuvable.");
+                lblComLivresInfos.Text = "Informations livre : ";
+                dgvComLivres.DataSource = null;
+            }
+        }
+
+        /// <summary>
+        /// Enregistre une nouvelle commande de livre
+        /// </summary>
+        private void EnregistrerNouvelleCommande()
+        {
+            string idDocument = txbComLivresNum.Text;
+            double montant = double.Parse(txbComLivresMontant.Text);
+            int nbExemplaires = (int)nudComLivresQuantite.Value;
+            
+            CommandeDocument uneCommande = new CommandeDocument(idDocument, DateTime.Now, montant, nbExemplaires, idDocument, "001", "En cours");
+            if (controller.CreerCommandeDocument(uneCommande))
+            {
+                MessageBox.Show("Commande enregistrée avec succès.");
+                ChargerCommandesLivre(idDocument);
+            }
+            else
+            {
+                MessageBox.Show("Erreur lors de l'enregistrement.");
+            }
+        }
+
+        /// <summary>
+        /// l'étape de suivi d'une commande en appliquant les règles de sécurité
+        /// </summary>
+        private void ModifierSuiviCommande()
+        {
+            if (dgvComLivres.CurrentRow == null)
+            {
+                MessageBox.Show("Veuillez sélectionner une commande dans la liste.");
+                return;
+            }
+
+            CommandeDocument commandeSelectionnee = (CommandeDocument)dgvComLivres.CurrentRow.DataBoundItem;
+            Suivi nouveauSuivi = (Suivi)cbxComLivresSuivi.SelectedItem;
+
+            if (int.Parse(commandeSelectionnee.IdSuivi) >= 3 && int.Parse(nouveauSuivi.Id) < 3)
+            {
+                MessageBox.Show("Sécurité : Une commande livrée ou réglée ne peut pas revenir à un état précédent.");
+                return;
+            }
+
+            if (nouveauSuivi.Id == 4 && commandeSelectionnee.IdSuivi < 3)
+            {
+                MessageBox.Show("Sécurité : Une commande doit être livrée avant de pouvoir être réglée.");
+                return;
+            }
+
+            commandeSelectionnee.IdSuivi = nouveauSuivi.Id.ToString();
+            commandeSelectionnee.LibelleSuivi = nouveauSuivi.Libelle;
+
+            if (controller.ModifierCommandeDocument(commandeSelectionnee))
+            {
+                MessageBox.Show("L'étape de suivi a été modifiée avec succès.");
+                ChargerCommandesLivre(txbComLivresNum.Text);
+            }
+        }
+
+        /// <summary>
+        /// Supprime une commande si elle n'est pas encore livrée
+        /// </summary>
+        private void SupprimerCommande()
+        {
+            if (dgvComLivres.CurrentRow == null) return;
+            CommandeDocument commandeSelectionnee = (CommandeDocument)dgvComLivres.CurrentRow.DataBoundItem;
+
+            if (int.Parse(commandeSelectionnee.IdSuivi) >= 3)
+            {
+                MessageBox.Show("Impossible de supprimer une commande déjà livrée ou réglée.");
+                return;
+            }
+
+            if (MessageBox.Show("Supprimer la commande ?", STR_CONFIRMATION, MessageBoxButtons.YesNo) == DialogResult.Yes 
+                && controller.SupprimerCommandeDocument(commandeSelectionnee))
+            {
+                MessageBox.Show("Commande supprimée.");
+                ChargerCommandesLivre(txbComLivresNum.Text);
+            }
+        }
+
+        /// <summary>
+        /// Initialisation de l'onglet des commandes de DVD
+        /// </summary>
+        private void InitCommandesDvd()
+        {
+            tabCommandesDvd = new TabPage("Commandes de DVD");
+            tabPrincipal.TabPages.Add(tabCommandesDvd);
+
+            Label lblNum = new Label { Text = "Numéro DVD :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
+            txbComDvdNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
+            Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
+            lblComDvdInfos = new Label { Text = "Informations DVD : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            btnRechercher.Click += (s, e) => { ChargerCommandesDvd(txbComDvdNum.Text); };
+
+            dgvComDvd = new DataGridView {
+                Location = new System.Drawing.Point(20, 60),
+                Size = new System.Drawing.Size(450, 300),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            };
+            dgvComDvd.Columns.Add("Date", "Date");
+            dgvComDvd.Columns.Add(STR_MONTANT, STR_MONTANT);
+            dgvComDvd.Columns.Add("Quantite", "Quantité");
+            dgvComDvd.Columns.Add(STR_SUIVI, STR_SUIVI);
+
+            grpComDvdSaisie = new GroupBox { Text = "Gestion de la commande DVD", Location = new System.Drawing.Point(500, 60), Size = new System.Drawing.Size(280, 300) };
+            
+            Label lblMontant = new Label { Text = "Montant :", Location = new System.Drawing.Point(10, 30), Width = 70 };
+            txbComDvdMontant = new TextBox { Location = new System.Drawing.Point(90, 27), Width = 100 };
+            Label lblQuantite = new Label { Text = "Quantité :", Location = new System.Drawing.Point(10, 70), Width = 70 };
+            nudComDvdQuantite = new NumericUpDown { Location = new System.Drawing.Point(90, 67), Width = 60, Minimum = 1 };
+            
+            btnComDvdAjouter = new Button { Text = STR_ENREGISTRER, Location = new System.Drawing.Point(10, 110), Width = 100 };
+            btnComDvdAjouter.Click += (s, e) => { EnregistrerNouvelleCommandeDvd(); };
+
+            Label lblSuivi = new Label { Text = "Nouvel état :", Location = new System.Drawing.Point(10, 160), Width = 80 };
+            cbxComDvdSuivi = new ComboBox { Location = new System.Drawing.Point(100, 157), Width = 150, DropDownStyle = ComboBoxStyle.DropDownList };
+            cbxComDvdSuivi.DataSource = controller.GetAllSuivi();
+            cbxComDvdSuivi.DisplayMember = "Libelle";
+            
+            Button btnModifier = new Button { Text = "Changer l'état", Location = new System.Drawing.Point(100, 190), Width = 100 };
+            btnModifier.Click += (s, e) => { ModifierSuiviCommandeDvd(); };
+
+            Button btnSupprimer = new Button { Text = "Supprimer", Location = new System.Drawing.Point(10, 250), Width = 100, BackColor = System.Drawing.Color.LightCoral };
+            btnSupprimer.Click += (s, e) => { SupprimerCommandeDvd(); };
+
+            grpComDvdSaisie.Controls.Add(lblMontant);
+            grpComDvdSaisie.Controls.Add(txbComDvdMontant);
+            grpComDvdSaisie.Controls.Add(lblQuantite);
+            grpComDvdSaisie.Controls.Add(nudComDvdQuantite);
+            grpComDvdSaisie.Controls.Add(btnComDvdAjouter);
+            grpComDvdSaisie.Controls.Add(lblSuivi);
+            grpComDvdSaisie.Controls.Add(cbxComDvdSuivi);
+            grpComDvdSaisie.Controls.Add(btnModifier);
+            grpComDvdSaisie.Controls.Add(btnSupprimer);
+
+            tabCommandesDvd.Controls.Add(lblNum);
+            tabCommandesDvd.Controls.Add(txbComDvdNum);
+            tabCommandesDvd.Controls.Add(btnRechercher);
+            tabCommandesDvd.Controls.Add(lblComDvdInfos);
+            tabCommandesDvd.Controls.Add(dgvComDvd);
+            tabCommandesDvd.Controls.Add(grpComDvdSaisie);
+        }
+
+        /// <summary>
+        /// Les commandes et les infos du DVD
+        /// </summary>
+        private void ChargerCommandesDvd(string idDvd)
+        {
+            Dvd leDvd = controller.GetDvd(idDvd);
+            if (leDvd != null)
+            {
+                lblComDvdInfos.Text = $"DVD : {leDvd.Titre} - {leDvd.Realisateur}";
+                List<CommandeDocument> lesCommandes = controller.GetCommandesDocument(idDvd);
+                dgvComDvd.DataSource = lesCommandes;
+            }
+            else
+            {
+                MessageBox.Show("Numéro de DVD introuvable.");
+                dgvComDvd.DataSource = null;
+            }
+        }
+
+        private void EnregistrerNouvelleCommandeDvd()
+        {
+            string idDoc = txbComDvdNum.Text;
+            double montant = double.Parse(txbComDvdMontant.Text);
+            int qte = (int)nudComDvdQuantite.Value;
+            
+            CommandeDocument com = new CommandeDocument(idDoc, DateTime.Now, montant, qte, idDoc, "001", "En cours");
+
+            if (controller.CreerCommandeDocument(com))
+            {
+                MessageBox.Show("Commande DVD enregistrée.");
+                ChargerCommandesDvd(idDoc);
+            }
+        }
+
+        private void ModifierSuiviCommandeDvd()
+        {
+            if (dgvComDvd.CurrentRow == null) return;
+            CommandeDocument com = (CommandeDocument)dgvComDvd.CurrentRow.DataBoundItem;
+            Suivi nouveau = (Suivi)cbxComDvdSuivi.SelectedItem;
+
+            if (int.Parse(com.IdSuivi) >= 3 && int.Parse(nouveau.Id) < 3) {
+                MessageBox.Show("Action impossible : Commande déjà livrée/réglée.");
+                return;
+            }
+            if (int.Parse(nouveau.Id) == 4 && int.Parse(com.IdSuivi) < 3) {
+                MessageBox.Show("Action impossible : Livraison nécessaire avant règlement.");
+                return;
+            }
+
+            com.IdSuivi = nouveau.Id.ToString();
+            if (controller.ModifierCommandeDocument(com)) {
+                ChargerCommandesDvd(txbComDvdNum.Text);
+            }
+        }
+
+        private void SupprimerCommandeDvd()
+        {
+            if (dgvComDvd.CurrentRow == null) return;
+            CommandeDocument com = (CommandeDocument)dgvComDvd.CurrentRow.DataBoundItem;
+
+            if (int.Parse(com.IdSuivi) >= 3) {
+                MessageBox.Show("Suppression interdite pour un DVD déjà livré.");
+                return;
+            }
+
+            if (MessageBox.Show("Supprimer ?", STR_CONFIRMATION, MessageBoxButtons.YesNo) == DialogResult.Yes
+                && controller.SupprimerCommandeDocument(com)) {
+                ChargerCommandesDvd(txbComDvdNum.Text);
+            }
+        }
+
+        /// <summary>
+        /// Initialisation de l'onglet des commandes de revues
+        /// </summary>
+        private void InitCommandesRevues()
+        {
+            tabCommandesRevues = new TabPage("Commandes de revues");
+            tabPrincipal.TabPages.Add(tabCommandesRevues);
+
+            Label lblNum = new Label { Text = "Numéro revue :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
+            txbComRevuesNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
+            Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
+            lblComRevuesInfos = new Label { Text = "Informations revue : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            
+            btnRechercher.Click += (s, e) => { ChargerCommandesRevue(txbComRevuesNum.Text); };
+
+            dgvComRevues = new DataGridView {
+                Location = new System.Drawing.Point(20, 60),
+                Size = new System.Drawing.Size(450, 300),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            };
+            dgvComRevues.Columns.Add("Date", "Date Commande");
+            dgvComRevues.Columns.Add(STR_MONTANT, STR_MONTANT);
+            dgvComRevues.Columns.Add("DateFin", "Fin Abonnement");
+
+            grpComRevuesSaisie = new GroupBox { Text = "Gestion de l'abonnement", Location = new System.Drawing.Point(500, 60), Size = new System.Drawing.Size(280, 300) };
+            
+            Label lblDate = new Label { Text = "Date commande :", Location = new System.Drawing.Point(10, 30), Width = 100 };
+            dtpComRevuesDate = new DateTimePicker { Location = new System.Drawing.Point(120, 27), Width = 130 };
+            
+            Label lblMontant = new Label { Text = "Montant :", Location = new System.Drawing.Point(10, 70), Width = 100 };
+            txbComRevuesMontant = new TextBox { Location = new System.Drawing.Point(120, 67), Width = 80 };
+            
+            Label lblFin = new Label { Text = "Date de fin :", Location = new System.Drawing.Point(10, 110), Width = 100 };
+            dtpComRevuesFin = new DateTimePicker { Location = new System.Drawing.Point(120, 107), Width = 130 };
+
+            btnComRevuesAjouter = new Button { Text = STR_ENREGISTRER, Location = new System.Drawing.Point(10, 160), Width = 100 };
+            btnComRevuesAjouter.Click += (s, e) => { EnregistrerAbonnement(); };
+
+            Button btnSupprimer = new Button { Text = "Supprimer", Location = new System.Drawing.Point(10, 250), Width = 100, BackColor = System.Drawing.Color.LightCoral };
+            btnSupprimer.Click += (s, e) => { SupprimerAbonnement(); };
+
+            grpComRevuesSaisie.Controls.Add(lblDate);
+            grpComRevuesSaisie.Controls.Add(dtpComRevuesDate);
+            grpComRevuesSaisie.Controls.Add(lblMontant);
+            grpComRevuesSaisie.Controls.Add(txbComRevuesMontant);
+            grpComRevuesSaisie.Controls.Add(lblFin);
+            grpComRevuesSaisie.Controls.Add(dtpComRevuesFin);
+            grpComRevuesSaisie.Controls.Add(btnComRevuesAjouter);
+            grpComRevuesSaisie.Controls.Add(btnSupprimer);
+
+            tabCommandesRevues.Controls.Add(lblNum);
+            tabCommandesRevues.Controls.Add(txbComRevuesNum);
+            tabCommandesRevues.Controls.Add(btnRechercher);
+            tabCommandesRevues.Controls.Add(lblComRevuesInfos);
+            tabCommandesRevues.Controls.Add(dgvComRevues);
+            tabCommandesRevues.Controls.Add(grpComRevuesSaisie);
+        }
+
+        /// <summary>
+        /// Charge les abonnements d'une revue
+        /// </summary>
+        private void ChargerCommandesRevue(string idRevue)
+        {
+            Revue laRevue = controller.GetRevue(idRevue);
+            if (laRevue != null)
+            {
+                lblComRevuesInfos.Text = $"Revue : {laRevue.Titre} - Editeur : {laRevue.Editeur}";
+                
+                List<Abonnement> lesAbonnements = controller.GetAbonnements(idRevue);
+                
+                dgvComRevues.DataSource = lesAbonnements;
+            }
+            else
+            {
+                MessageBox.Show("Numéro de revue introuvable.");
+                lblComRevuesInfos.Text = "Informations revue : ";
+                dgvComRevues.DataSource = null;
+            }
+        }
+
+        /// <summary>
+        /// Enregistre un nouvel abonnement ou un renouvellement
+        /// </summary>
+        private void EnregistrerAbonnement()
+        {
+            try 
+            {
+                string idRevue = txbComRevuesNum.Text;
+                DateTime dateCommande = dtpComRevuesDate.Value;
+                DateTime dateFin = dtpComRevuesFin.Value;
+                double montant = double.Parse(txbComRevuesMontant.Text);
+
+                if (dateFin <= dateCommande)
+                {
+                    MessageBox.Show("La date de fin doit être supérieure à la date de commande.");
+                    return;
+                }
+
+                Abonnement nouvelAbo = new Abonnement("", dateCommande, montant, dateFin, idRevue);
+
+                if (controller.CreerAbonnement(nouvelAbo))
+                {
+                    MessageBox.Show("Abonnement enregistré avec succès.");
+                    ChargerCommandesRevue(idRevue);
+                }
+            }
+            catch 
+            {
+                MessageBox.Show("Erreur : Vérifiez le format du montant.");
+            }
+        }
+
+        /// <summary>
+        /// Supprime un abonnement si aucun exemplaire n'est rattaché
+        /// </summary>
+        private void SupprimerAbonnement()
+        {
+            if (dgvComRevues.CurrentRow == null) return;
+            Abonnement abo = (Abonnement)dgvComRevues.CurrentRow.DataBoundItem;
+
+            List<Exemplaire> listeExemplairesAbo = controller.GetExemplairesRevue(abo.IdIden);
+
+            if (listeExemplairesAbo.Any(ex => ParutionDansAbonnement(abo.DateCommande, abo.DateFinAbonnement, ex.DateReception)))
+            {
+                MessageBox.Show("Suppression impossible : des exemplaires sont rattachés à cet abonnement.");
+            }
+            else if (MessageBox.Show("Supprimer ?", STR_CONFIRMATION, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                controller.SupprimerAbonnement(abo);
+                ChargerCommandesRevue(txbComRevuesNum.Text);
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si une date de parution est comprise entre deux dates
+        /// </summary>
+        public static bool ParutionDansAbonnement(DateTime dateCommande, DateTime dateFin, DateTime dateParution)
+        {
+            return (dateParution >= dateCommande && dateParution <= dateFin);
+        }
+
+        private void AlerteFinAbonnements()
+        {
+            List<Abonnement> lesAbonnementsProches = controller.GetAbonnementsEcheance();
+
+            if (lesAbonnementsProches.Count > 0)
+            {
+              var messageBuilder = new System.Text.StringBuilder("Rappel : Les abonnements suivants se terminent bientôt :\n\n");
+              foreach (Abonnement abo in lesAbonnementsProches)
+                {
+                   Revue revue = controller.GetRevue(abo.IdIden);
+                   messageBuilder.Append("- ").Append(revue.Titre).Append(" : le ").Append(abo.DateFinAbonnement.ToString("dd/MM/yyyy")).Append("\n");
+                }
+                MessageBox.Show(messageBuilder.ToString(), "Alerte Échéances Abonnements", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+
 
         /// <summary>
         /// Rempli un des 3 combo (genre, public, rayon)
@@ -404,9 +906,9 @@ namespace MediaTekDocuments.view
             }
             else
             {
-                if (bdgDvdListe.CurrentRow != null)
-                {
-                    Dvd dvd = (Dvd)bdgDvdListe.CurrentRow;
+                if (bdgDvdListe.Current != null)
+            {
+                    Dvd dvd = (Dvd)bdgDvdListe.Current;
                     dvd.Titre = txbDvdTitre.Text;
                     dvd.Realisateur = txbDvdRealisateur.Text;
                     dvd.Duree = int.Parse(txbDvdDuree.Text);
@@ -481,7 +983,7 @@ namespace MediaTekDocuments.view
             }
             else
             {
-                Livre livre = (Livre)bdgLivresListe.CurrentRow;
+                Livre livre = (Livre)bdgDvdListe.Current;
                 livre.Titre = txbLivresTitre.Text;
                 livre.Auteur = txbLivresAuteur.Text;
                 livre.Collection = txbLivresCollection.Text;
@@ -503,7 +1005,7 @@ namespace MediaTekDocuments.view
         {
             if (dgvLivresListe.CurrentRow != null)
             {
-                Livre livre = (Livre)bdgLivresListe.CurrentRow;
+                Livre livre = (Livre)bdgLivresListe.Current;
                 if (MessageBox.Show("Supprimer " + livre.Titre + " ?", "Confirmation", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     if (controller.SupprimerLivre(livre))
@@ -581,7 +1083,7 @@ namespace MediaTekDocuments.view
                 
                 Revue revue = new Revue(txbRevuesNumRecherche.Text, txbRevuesTitre.Text, txbRevuesImage.Text, 
                     genre.Id, genre.Libelle, lePublic.Id, lePublic.Libelle, rayon.Id, rayon.Libelle, 
-                    txbRevuesPeriodicite.Text, int.Parse(txbRevuesDelaiMiseADispo.Text));
+                    txbRevuesPeriodicite.Text, int.Parse(txbRevuesDateMiseADispo.Text), ""); 
 
                 if (controller.CreerRevue(revue))
                 {
@@ -599,7 +1101,7 @@ namespace MediaTekDocuments.view
         {
             if (dgvRevuesListe.CurrentRow != null)
             {
-                Revue revue = (Revue)bdgRevuesListe.CurrentRow;
+                Revue revue = (Revue)bdgRevuesListe.Current;
                 if (MessageBox.Show("Supprimer " + revue.Titre + " ?", "Confirmation", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     if (controller.SupprimerRevue(revue))
@@ -619,7 +1121,7 @@ namespace MediaTekDocuments.view
         {
             txbRevuesTitre.Text = ""; 
             txbRevuesPeriodicite.Text = ""; 
-            txbRevuesDelaiMiseADispo.Text = ""; 
+            txbRevuesDateMiseADispo.Text = ""; 
             txbRevuesImage.Text = "";
         }
 
@@ -627,7 +1129,7 @@ namespace MediaTekDocuments.view
         {
             txbRevuesTitre.ReadOnly = false; 
             txbRevuesPeriodicite.ReadOnly = false; 
-            txbRevuesDelaiMiseADispo.ReadOnly = false; 
+            txbRevuesDateMiseADispo.ReadOnly = false; 
             txbRevuesImage.ReadOnly = false;
         }
 
@@ -639,7 +1141,7 @@ namespace MediaTekDocuments.view
             btnRevuesSupprimer.Enabled = true;
             txbRevuesTitre.ReadOnly = true; 
             txbRevuesPeriodicite.ReadOnly = true; 
-            txbRevuesDelaiMiseADispo.ReadOnly = true;
+            txbRevuesDateMiseADispo.ReadOnly = true;
             txbRevuesImage.ReadOnly = true;
         }
 
@@ -1444,11 +1946,14 @@ namespace MediaTekDocuments.view
                 try
                 {
                     int numero = int.Parse(txbReceptionExemplaireNumero.Text);
-                    DateTime dateAchat = dtpReceptionExemplaireDate.Value;
+                    DateTime dateReception = dtpReceptionExemplaireDate.Value;
+                    DateTime dateAchat = DateTime.Now;
                     string photo = txbReceptionExemplaireImage.Text;
                     string idEtat = ETATNEUF;
                     string idDocument = txbReceptionRevueNumero.Text;
-                    Exemplaire exemplaire = new Exemplaire(numero, dateAchat, photo, idEtat, idDocument);
+
+                    Exemplaire exemplaire = new Exemplaire(numero, dateReception, photo, idEtat, idDocument, dateAchat);
+
                     if (controller.CreerExemplaire(exemplaire))
                     {
                         AfficheReceptionExemplairesRevue();
@@ -1523,3 +2028,4 @@ namespace MediaTekDocuments.view
         #endregion
     }
 }
+

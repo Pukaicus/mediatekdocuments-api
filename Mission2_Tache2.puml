@@ -2,27 +2,29 @@
 left to right direction
 skinparam packageStyle rectangle
 
-actor "Bibliothécaire" as biblio
+actor "Utilisateur" as user
 
-rectangle "MediaTekDocuments - Mission 3" {
-  usecase "Consulter la liste des exemplaires" as UC1
-  usecase "Changer l'état d'un exemplaire" as UC2
-  usecase "Supprimer un exemplaire" as UC3
-  usecase "Suivre l'état des parutions (Revues)" as UC4
+rectangle "MediaTekDocuments - Sécurité" {
+  usecase "S'authentifier" as UC_Auth
+  usecase "Consulter les documents" as UC_Consul
+  usecase "Gérer les commandes (Admin)" as UC_Admin
+  usecase "Suivre les abonnements (Admin)" as UC_Alerte
+  usecase "Accès refusé (Culture)" as UC_Refus
 }
 
-biblio --> UC1
-biblio --> UC2
-biblio --> UC3
-biblio --> UC4
+user --> UC_Auth
+UC_Auth <.. UC_Consul : <<include>>
+UC_Auth <.. UC_Admin : <<include>>
+UC_Auth <.. UC_Alerte : <<include>>
+UC_Auth <.. UC_Refus : <<include>>
 
-note bottom of UC1
-  Tri par date d'achat inverse
-  (Livres, DVD, Revues)
+note right of UC_Refus
+  Entraîne la fermeture 
+  de l'application
 end note
 
-note bottom of UC3
-  Confirmation requise avant
-  suppression physique
+note right of UC_Alerte
+  Alerte proactive 
+  réservée au service Administratif
 end note
 @enduml

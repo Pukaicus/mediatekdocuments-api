@@ -38,16 +38,15 @@ namespace MediaTekDocuments.view
         /// <summary>
         /// Constructeur : création du contrôleur lié à ce formulaire
         /// </summary>
-        internal FrmMediatek()
+        internal FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
             this.controller = new FrmMediatekController();
             InitCommandesLivres();
             InitCommandesDvd();
             InitCommandesRevues();
-            AlerteFinAbonnements();
-            AlerteFinAbonnements();
             btnLivresExemplairesSuppr.Click += (s, e) => SupprimerExemplaire();
+            GestionAcces(utilisateur);
         }
 
         /// <summary>
@@ -552,26 +551,28 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Gère les accès aux fonctionnalités selon le service de l'utilisateur connecté
+        /// Gère les accès selon le service de l'utilisateur connecté
         /// </summary>
         /// <param name="utilisateur">L'objet Utilisateur authentifié</param>
         private void GestionAcces(Utilisateur utilisateur)
         {
-            if (utilisateur.Service == "Culture") 
-            {
-                MessageBox.Show("Vos droits ne sont pas suffisants pour accéder à cette application.", "Accès refusé", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                Application.Exit();
-            }
-            
-            if (utilisateur.Service == "Prêts") 
+            if (utilisateur.Service == "Prêts")
             {
                 tabCommandes.Visible = false;
                 tabSuivi.Visible = false;
+                btnSupprimerExemplaire.Enabled = false;
             }
-            
-            if (utilisateur.Service == "Administratif") 
+
+            if (utilisateur.Service == "Administratif")
             {
                 AlerteFinAbonnements();
+            }
+
+            if (utilisateur.Service == "Culture")
+            {
+                MessageBox.Show("Vos droits ne sont pas suffisants pour accéder à cette application.", 
+                    "Accès refusé", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                Application.Exit();
             }
         }
 

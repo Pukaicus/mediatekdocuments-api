@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Bibliothécaire" as biblio
+
+rectangle "MediaTekDocuments - Mission 3" {
+  usecase "Consulter la liste des exemplaires" as UC1
+  usecase "Changer l'état d'un exemplaire" as UC2
+  usecase "Supprimer un exemplaire" as UC3
+  usecase "Suivre l'état des parutions (Revues)" as UC4
+}
+
+biblio --> UC1
+biblio --> UC2
+biblio --> UC3
+biblio --> UC4
+
+note bottom of UC1
+  Tri par date d'achat inverse
+  (Livres, DVD, Revues)
+end note
+
+note bottom of UC3
+  Confirmation requise avant
+  suppression physique
+end note
+@enduml

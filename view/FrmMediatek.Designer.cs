@@ -30,7 +30,40 @@ namespace MediaTekDocuments.view
         private void InitializeComponent()
         {
             this.tabOngletsApplication = new System.Windows.Forms.TabControl();
+            this.tabCommandesLivres = new System.Windows.Forms.TabPage();
+            this.tabCommandesDvd = new System.Windows.Forms.TabPage();
+            this.tabCommandesRevues = new System.Windows.Forms.TabPage();
             this.tabLivres = new System.Windows.Forms.TabPage();
+            this.btnDvdAjouter = new System.Windows.Forms.Button();
+            this.btnDvdModifier = new System.Windows.Forms.Button();
+            this.btnDvdSupprimer = new System.Windows.Forms.Button();
+            this.btnRevuesAjouter = new System.Windows.Forms.Button();
+            this.btnRevuesModifier = new System.Windows.Forms.Button();
+            this.btnRevuesSupprimer = new System.Windows.Forms.Button();
+            this.txbComLivresNum = new System.Windows.Forms.TextBox();
+            this.lblComLivresInfos = new System.Windows.Forms.Label();
+            this.dgvComLivres = new System.Windows.Forms.DataGridView();
+            this.grpComLivresSaisie = new System.Windows.Forms.GroupBox();
+            this.txbComLivresMontant = new System.Windows.Forms.TextBox();
+            this.nudComLivresQuantite = new System.Windows.Forms.NumericUpDown();
+            this.btnComLivresAjouter = new System.Windows.Forms.Button();
+            this.cbxComLivresSuivi = new System.Windows.Forms.ComboBox();
+            this.txbComDvdNum = new System.Windows.Forms.TextBox();
+            this.lblComDvdInfos = new System.Windows.Forms.Label();
+            this.dgvComDvd = new System.Windows.Forms.DataGridView();
+            this.grpComDvdSaisie = new System.Windows.Forms.GroupBox();
+            this.txbComDvdMontant = new System.Windows.Forms.TextBox();
+            this.nudComDvdQuantite = new System.Windows.Forms.NumericUpDown();
+            this.btnComDvdAjouter = new System.Windows.Forms.Button();
+            this.cbxComDvdSuivi = new System.Windows.Forms.ComboBox();
+            this.txbComRevuesNum = new System.Windows.Forms.TextBox();
+            this.lblComRevuesInfos = new System.Windows.Forms.Label();
+            this.dgvComRevues = new System.Windows.Forms.DataGridView();
+            this.grpComRevuesSaisie = new System.Windows.Forms.GroupBox();
+            this.dtpComRevuesDate = new System.Windows.Forms.DateTimePicker();
+            this.txbComRevuesMontant = new System.Windows.Forms.TextBox();
+            this.dtpComRevuesFin = new System.Windows.Forms.DateTimePicker();
+            this.btnComRevuesAjouter = new System.Windows.Forms.Button();
             this.grpLivresInfos = new System.Windows.Forms.GroupBox();
             this.label59 = new System.Windows.Forms.Label();
             this.btnLivresAjouter = new System.Windows.Forms.Button();
@@ -69,6 +102,14 @@ namespace MediaTekDocuments.view
             this.cbxLivresGenres = new System.Windows.Forms.ComboBox();
             this.label14 = new System.Windows.Forms.Label();
             this.dgvLivresListe = new System.Windows.Forms.DataGridView();
+            this.dgvLivresExemplaires = new System.Windows.Forms.DataGridView();
+            this.dgvLivresExemplaires.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvLivresExemplaires.Location = new System.Drawing.Point(20, 550);
+            this.dgvLivresExemplaires.Name = "dgvLivresExemplaires";
+            this.dgvLivresExemplaires.Size = new System.Drawing.Size(600, 200);
+            this.dgvLivresExemplaires.TabIndex = 50;
+            this.dgvLivresExemplaires.AllowUserToOrderColumns = true;
+            this.tabLivres.Controls.Add(this.dgvLivresExemplaires);
             this.label6 = new System.Windows.Forms.Label();
             this.txbLivresTitreRecherche = new System.Windows.Forms.TextBox();
             this.tabDvd = new System.Windows.Forms.TabPage();
@@ -212,6 +253,9 @@ namespace MediaTekDocuments.view
             this.tabOngletsApplication.Controls.Add(this.tabDvd);
             this.tabOngletsApplication.Controls.Add(this.tabRevues);
             this.tabOngletsApplication.Controls.Add(this.tabReceptionRevue);
+            this.tabOngletsApplication.Controls.Add(this.tabCommandesLivres);
+            this.tabOngletsApplication.Controls.Add(this.tabCommandesDvd);
+            this.tabOngletsApplication.Controls.Add(this.tabCommandesRevues);
             this.tabOngletsApplication.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabOngletsApplication.ItemSize = new System.Drawing.Size(49, 18);
             this.tabOngletsApplication.Location = new System.Drawing.Point(0, 0);
@@ -219,6 +263,22 @@ namespace MediaTekDocuments.view
             this.tabOngletsApplication.SelectedIndex = 0;
             this.tabOngletsApplication.Size = new System.Drawing.Size(883, 659);
             this.tabOngletsApplication.TabIndex = 0;
+
+            // Configuration tabCommandesLivres
+            this.tabCommandesLivres.Location = new System.Drawing.Point(4, 22);
+            this.tabCommandesLivres.Name = "tabCommandesLivres";
+            this.tabCommandesLivres.Text = "Commandes Livres";
+
+            // Configuration tabCommandesDvd
+            this.tabCommandesDvd.Location = new System.Drawing.Point(4, 22);
+            this.tabCommandesDvd.Name = "tabCommandesDvd";
+            this.tabCommandesDvd.Text = "Commandes DVD";
+
+            // Configuration tabCommandesRevues
+            this.tabCommandesRevues.Location = new System.Drawing.Point(4, 22);
+            this.tabCommandesRevues.Name = "tabCommandesRevues";
+            this.tabCommandesRevues.Text = "Commandes Revues";
+
             // 
             // tabLivres
             // 
@@ -1813,7 +1873,7 @@ namespace MediaTekDocuments.view
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(883, 659);
+            this.ClientSize = new System.Drawing.Size(1164, 950);
             this.Controls.Add(this.tabOngletsApplication);
             this.Name = "FrmMediatek";
             this.Text = "Gestion des documents de la médiathèque";
@@ -1855,6 +1915,9 @@ namespace MediaTekDocuments.view
         #endregion
 
         private System.Windows.Forms.TabControl tabOngletsApplication;
+        private System.Windows.Forms.TabPage tabCommandesLivres;
+        private System.Windows.Forms.TabPage tabCommandesDvd;
+        private System.Windows.Forms.TabPage tabCommandesRevues;
         private System.Windows.Forms.TabPage tabRevues;
         private System.Windows.Forms.TabPage tabLivres;
         private System.Windows.Forms.TabPage tabDvd;
@@ -2006,6 +2069,40 @@ namespace MediaTekDocuments.view
         private System.Windows.Forms.Button btnLivresAjouter;
         private System.Windows.Forms.Button btnLivresModifier;
         private System.Windows.Forms.Button btnLivresSupprimer;
+        private System.Windows.Forms.TextBox txbComLivresNum;
+        private System.Windows.Forms.Label lblComLivresInfos;
+        private System.Windows.Forms.DataGridView dgvComLivres;
+        private System.Windows.Forms.GroupBox grpComLivresSaisie;
+        private System.Windows.Forms.TextBox txbComLivresMontant;
+        private System.Windows.Forms.NumericUpDown nudComLivresQuantite;
+        private System.Windows.Forms.Button btnComLivresAjouter;
+        private System.Windows.Forms.ComboBox cbxComLivresSuivi;
+        private System.Windows.Forms.TextBox txbComDvdNum;
+        private System.Windows.Forms.Label lblComDvdInfos;
+        private System.Windows.Forms.DataGridView dgvComDvd;
+        private System.Windows.Forms.GroupBox grpComDvdSaisie;
+        private System.Windows.Forms.TextBox txbComDvdMontant;
+        private System.Windows.Forms.NumericUpDown nudComDvdQuantite;
+        private System.Windows.Forms.Button btnComDvdAjouter;
+        private System.Windows.Forms.ComboBox cbxComDvdSuivi;
+        private System.Windows.Forms.TextBox txbComRevuesNum;
+        private System.Windows.Forms.Label lblComRevuesInfos;
+        private System.Windows.Forms.DataGridView dgvComRevues;
+        private System.Windows.Forms.GroupBox grpComRevuesSaisie;
+        private System.Windows.Forms.DateTimePicker dtpComRevuesDate;
+        private System.Windows.Forms.TextBox txbComRevuesMontant;
+        private System.Windows.Forms.DateTimePicker dtpComRevuesFin;
+        private System.Windows.Forms.Button btnComRevuesAjouter;
+        private System.Windows.Forms.Button btnDvdAjouter;
+        private System.Windows.Forms.Button btnDvdModifier;
+        private System.Windows.Forms.Button btnDvdSupprimer;
+        private System.Windows.Forms.Button btnRevuesAjouter;
+        private System.Windows.Forms.Button btnRevuesModifier;
+        private System.Windows.Forms.Button btnRevuesSupprimer;
+        private System.Windows.Forms.DataGridView dgvLivresExemplaires;
+        private System.Windows.Forms.Label lblLivresExemplaires;
+        private System.Windows.Forms.ComboBox cbxLivresExemplairesEtats;
+        private System.Windows.Forms.Button btnLivresExemplairesSuppr;
     }
 }
 

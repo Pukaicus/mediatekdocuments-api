@@ -15,5 +15,10 @@ namespace MediaTekDocuments.model
             this.DateFinAbonnement = dateFinAbonnement;
             this.IdRevue = idRevue;
         }
+
+        public static bool ParutionDansAbonnement(DateTime debut, DateTime fin, DateTime parution)
+        {
+            return (parution >= debut && parution <= fin);
+        }
     }
 }

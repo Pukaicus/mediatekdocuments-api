@@ -1,23 +1,23 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MediaTekDocuments.view; 
+using MediaTekDocuments.model;
 using System;
 
 namespace MediaTekDocumentsTests
 {
     [TestClass]
-    public class AbonnementTests
+    public class Test1
     {
         [TestMethod]
         public void TestParutionDansAbonnement()
         {
-            DateTime dateCommande = new DateTime(2024, 01, 01);
-            DateTime dateFin = new DateTime(2024, 12, 31);
+            DateTime debut = new DateTime(2024, 1, 1);
+            DateTime fin = new DateTime(2024, 12, 31);
+            
+            DateTime parutionOk = new DateTime(2024, 6, 1);
+            Assert.IsTrue(Abonnement.ParutionDansAbonnement(debut, fin, parutionOk));
 
-            DateTime dateParutionOk = new DateTime(2024, 06, 01);
-            Assert.IsTrue(FrmMediatek.ParutionDansAbonnement(dateCommande, dateFin, dateParutionOk));
-
-            DateTime dateParutionHors = new DateTime(2025, 01, 15);
-            Assert.IsFalse(FrmMediatek.ParutionDansAbonnement(dateCommande, dateFin, dateParutionHors));
+            DateTime parutionHors = new DateTime(2025, 1, 1);
+            Assert.IsFalse(Abonnement.ParutionDansAbonnement(debut, fin, parutionHors));
         }
     }
 }

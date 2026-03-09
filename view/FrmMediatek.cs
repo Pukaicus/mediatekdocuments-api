@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
 using System.IO;
+using System.Text;
 
 namespace MediaTekDocuments.view
 
@@ -15,6 +16,12 @@ namespace MediaTekDocuments.view
     /// </summary>
     public partial class FrmMediatek : Form
     {
+        private readonly BindingSource bdgGenres = new BindingSource();
+        private readonly BindingSource bdgPublics = new BindingSource();
+        private readonly BindingSource bdgRayons = new BindingSource();
+        private readonly BindingSource bdgLivresListe = new BindingSource();
+        private readonly BindingSource bdgDvdListe = new BindingSource();
+        private readonly BindingSource bdgRevuesListe = new BindingSource();
         private const string MSG_INTROUVABLE = "Information non trouvée";
         private const string ETAT_AJOUTER = "Ajouter";
         private const string ETAT_ENREGISTRER = "Enregistrer";
@@ -23,38 +30,10 @@ namespace MediaTekDocuments.view
         private const string STR_SUIVI = "Suivi";
         private const string STR_CONFIRMATION = "Confirmation";
         private const string STR_ENREGISTRER = "Enregistrer";
+        private const string STR_INFO = "Information";
         #region Commun
         private readonly FrmMediatekController controller;
-        private TabPage tabCommandesLivres;
-        private DataGridView dgvComLivres;
-        private TextBox txbComLivresNum;
-        private GroupBox grpComLivresSaisie;
-        private NumericUpDown nudComLivresQuantite;
-        private TextBox txbComLivresMontant;
-        private ComboBox cbxComLivresSuivi;
-        private Button btnComLivresAjouter;
-        private readonly BindingSource bdgGenres = new BindingSource();
-        private readonly BindingSource bdgPublics = new BindingSource();
-        private readonly BindingSource bdgRayons = new BindingSource();
-        private Label lblComLivresInfos;
-        private TabPage tabCommandesDvd;
-        private DataGridView dgvComDvd;
-        private TextBox txbComDvdNum;
-        private Label lblComDvdInfos;
-        private GroupBox grpComDvdSaisie;
-        private TextBox txbComDvdMontant;
-        private NumericUpDown nudComDvdQuantite;
-        private ComboBox cbxComDvdSuivi;
-        private Button btnComDvdAjouter;
-        private TabPage tabCommandesRevues;
-        private DataGridView dgvComRevues;
-        private TextBox txbComRevuesNum;
-        private Label lblComRevuesInfos;
-        private GroupBox grpComRevuesSaisie;
-        private DateTimePicker dtpComRevuesDate;
-        private TextBox txbComRevuesMontant;
-        private DateTimePicker dtpComRevuesFin;
-        private Button btnComRevuesAjouter;
+
 
         /// <summary>
         /// Constructeur : création du contrôleur lié à ce formulaire
@@ -67,6 +46,8 @@ namespace MediaTekDocuments.view
             InitCommandesDvd();
             InitCommandesRevues();
             AlerteFinAbonnements();
+            AlerteFinAbonnements();
+            btnLivresExemplairesSuppr.Click += (s, e) => SupprimerExemplaire();
         }
 
         /// <summary>
@@ -75,7 +56,7 @@ namespace MediaTekDocuments.view
         private void InitCommandesLivres()
         {
             tabCommandesLivres = new TabPage("Commandes de livres");
-            tabPrincipal.TabPages.Add(tabCommandesLivres); 
+            tabOngletsApplication.TabPages.Add(tabCommandesLivres); 
 
             Label lblNum = new Label { Text = "Numéro livre :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
             txbComLivresNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
@@ -192,13 +173,13 @@ namespace MediaTekDocuments.view
             CommandeDocument commandeSelectionnee = (CommandeDocument)dgvComLivres.CurrentRow.DataBoundItem;
             Suivi nouveauSuivi = (Suivi)cbxComLivresSuivi.SelectedItem;
 
-            if (int.Parse(commandeSelectionnee.IdSuivi) >= 3 && int.Parse(nouveauSuivi.Id) < 3)
+            if (int.Parse(commandeSelectionnee.IdSuivi) >= 3 && nouveauSuivi.Id < 3)
             {
                 MessageBox.Show("Sécurité : Une commande livrée ou réglée ne peut pas revenir à un état précédent.");
                 return;
             }
 
-            if (nouveauSuivi.Id == 4 && commandeSelectionnee.IdSuivi < 3)
+            if (nouveauSuivi.Id == 4 && int.Parse(commandeSelectionnee.IdSuivi) < 3)
             {
                 MessageBox.Show("Sécurité : Une commande doit être livrée avant de pouvoir être réglée.");
                 return;
@@ -242,7 +223,7 @@ namespace MediaTekDocuments.view
         private void InitCommandesDvd()
         {
             tabCommandesDvd = new TabPage("Commandes de DVD");
-            tabPrincipal.TabPages.Add(tabCommandesDvd);
+            tabOngletsApplication.TabPages.Add(tabCommandesDvd);
 
             Label lblNum = new Label { Text = "Numéro DVD :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
             txbComDvdNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
@@ -342,11 +323,11 @@ namespace MediaTekDocuments.view
             CommandeDocument com = (CommandeDocument)dgvComDvd.CurrentRow.DataBoundItem;
             Suivi nouveau = (Suivi)cbxComDvdSuivi.SelectedItem;
 
-            if (int.Parse(com.IdSuivi) >= 3 && int.Parse(nouveau.Id) < 3) {
+            if (int.Parse(com.IdSuivi) >= 3 && nouveau.Id < 3) {
                 MessageBox.Show("Action impossible : Commande déjà livrée/réglée.");
                 return;
             }
-            if (int.Parse(nouveau.Id) == 4 && int.Parse(com.IdSuivi) < 3) {
+            if (nouveau.Id == 4 && int.Parse(com.IdSuivi) < 3) {
                 MessageBox.Show("Action impossible : Livraison nécessaire avant règlement.");
                 return;
             }
@@ -379,7 +360,7 @@ namespace MediaTekDocuments.view
         private void InitCommandesRevues()
         {
             tabCommandesRevues = new TabPage("Commandes de revues");
-            tabPrincipal.TabPages.Add(tabCommandesRevues);
+            tabOngletsApplication.TabPages.Add(tabCommandesRevues);
 
             Label lblNum = new Label { Text = "Numéro revue :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
             txbComRevuesNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
@@ -489,11 +470,12 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Supprime un abonnement si aucun exemplaire n'est rattaché
+        /// Demande la suppression d'un abonnement après vérification de l'absence d'exemplaires rattachés
         /// </summary>
         private void SupprimerAbonnement()
         {
             if (dgvComRevues.CurrentRow == null) return;
+
             Abonnement abo = (Abonnement)dgvComRevues.CurrentRow.DataBoundItem;
 
             List<Exemplaire> listeExemplairesAbo = controller.GetExemplairesRevue(abo.IdIden);
@@ -509,29 +491,90 @@ namespace MediaTekDocuments.view
             }
         }
 
-        /// <summary>
-        /// Vérifie si une date de parution est comprise entre deux dates
-        /// </summary>
-        public static bool ParutionDansAbonnement(DateTime dateCommande, DateTime dateFin, DateTime dateParution)
+        public static bool ParutionDansAbonnement(DateTime dateCommande, DateTime dateFinAbonnement, DateTime dateParution)
         {
-            return (dateParution >= dateCommande && dateParution <= dateFin);
+             return (dateParution >= dateCommande && dateParution <= dateFinAbonnement);
         }
 
+        /// <summary>
+        /// Affiche une alerte si des abonnements de revues expirent dans moins de 30 jours
+        /// </summary>
         private void AlerteFinAbonnements()
         {
-            List<Abonnement> lesAbonnementsProches = controller.GetAbonnementsEcheance();
+            List<Revue> listeRevues = controller.GetAllRevues();
+            DateTime dans30Jours = DateTime.Now.AddDays(30);
 
-            if (lesAbonnementsProches.Count > 0)
+            var revuesCritiques = listeRevues
+                .Where(r => r.DateFinAbonnement > DateTime.Now && r.DateFinAbonnement <= dans30Jours)
+                .OrderBy(r => r.DateFinAbonnement)
+                .ToList();
+
+            if (revuesCritiques.Count > 0)
             {
-              var messageBuilder = new System.Text.StringBuilder("Rappel : Les abonnements suivants se terminent bientôt :\n\n");
-              foreach (Abonnement abo in lesAbonnementsProches)
+                StringBuilder sb = new StringBuilder("Abonnements se terminant dans moins de 30 jours :\n\n");
+                
+                foreach (Revue revue in revuesCritiques)
                 {
-                   Revue revue = controller.GetRevue(abo.IdIden);
-                   messageBuilder.Append("- ").Append(revue.Titre).Append(" : le ").Append(abo.DateFinAbonnement.ToString("dd/MM/yyyy")).Append("\n");
+                    sb.AppendLine($"- {revue.Titre} : fin le {revue.DateFinAbonnement:dd/MM/yyyy}");
                 }
-                MessageBox.Show(messageBuilder.ToString(), "Alerte Échéances Abonnements", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+                MessageBox.Show(sb.ToString(), "Alerte Abonnements", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+        /// <summary>
+        /// Supprime l'exemplaire sélectionné après confirmation de l'utilisateur
+        /// </summary>
+        private void SupprimerExemplaire()
+        {
+            if (dgvLivresExemplaires.CurrentRow != null)
+            {
+                Exemplaire exemplaire = (Exemplaire)dgvLivresExemplaires.CurrentRow.DataBoundItem;
+
+                if (MessageBox.Show($"Voulez-vous vraiment supprimer l'exemplaire n°{exemplaire.Numero} ?", 
+                    "Confirmation de suppression", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    if (controller.SupprimerExemplaire(exemplaire))
+                    {
+                        RemplirLivresExemplaires(dernierLivreSelectionne);
+                        MessageBox.Show("Exemplaire supprimé avec succès.", "Information");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Erreur lors de la suppression.", "Erreur");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Veuillez sélectionner un exemplaire à supprimer.", "Information");
+            }
+        }
+
+        /// <summary>
+        /// Gère les accès aux fonctionnalités selon le service de l'utilisateur connecté
+        /// </summary>
+        /// <param name="utilisateur">L'objet Utilisateur authentifié</param>
+        private void GestionAcces(Utilisateur utilisateur)
+        {
+            if (utilisateur.Service == "Culture") 
+            {
+                MessageBox.Show("Vos droits ne sont pas suffisants pour accéder à cette application.", "Accès refusé", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                Application.Exit();
+            }
+            
+            if (utilisateur.Service == "Prêts") 
+            {
+                tabCommandes.Visible = false;
+                tabSuivi.Visible = false;
+            }
+            
+            if (utilisateur.Service == "Administratif") 
+            {
+                AlerteFinAbonnements();
+            }
+        }
+
 
 
 
@@ -553,7 +596,6 @@ namespace MediaTekDocuments.view
         #endregion
 
         #region Onglet Livres
-        private readonly BindingSource bdgLivresListe = new BindingSource();
         private List<Livre> lesLivres = new List<Livre>();
 
         /// <summary>
@@ -925,14 +967,6 @@ namespace MediaTekDocuments.view
             }
         }
 
-        private void DeverrouillerChampsDvd() 
-        {
-            txbDvdTitre.ReadOnly = false; 
-            txbDvdDuree.ReadOnly = false; 
-            txbDvdRealisateur.ReadOnly = false; 
-            txbDvdSynopsis.ReadOnly = false; 
-            txbDvdImage.ReadOnly = false;
-        }
         #endregion
 
 
@@ -1147,7 +1181,6 @@ namespace MediaTekDocuments.view
 
         #endregion
 
-        private readonly BindingSource bdgDvdListe = new BindingSource();
         private List<Dvd> lesDvd = new List<Dvd>();
 
         /// <summary>
@@ -1462,7 +1495,6 @@ namespace MediaTekDocuments.view
 
 
         #region Onglet Revues
-        private readonly BindingSource bdgRevuesListe = new BindingSource();
         private List<Revue> lesRevues = new List<Revue>();
 
         /// <summary>
@@ -2025,7 +2057,37 @@ namespace MediaTekDocuments.view
                 pcbReceptionExemplaireRevueImage.Image = null;
             }
         }
+
         #endregion
+
+private void ViderChampsDvd()
+{
+    txbDvdNumRecherche.Text = "";
+    txbDvdTitre.Text = "";
+    txbDvdRealisateur.Text = "";
+    txbDvdDuree.Text = "";
+    txbDvdSynopsis.Text = "";
+    txbDvdImage.Text = "";
+}
+
+private void ResetInterfaceDvd()
+{
+    ViderChampsDvd();
+    btnDvdAjouter.Text = ETAT_AJOUTER;
+    btnDvdModifier.Text = ETAT_MODIFIER;
+    btnDvdAjouter.Enabled = true;
+    btnDvdModifier.Enabled = true;
+    btnDvdSupprimer.Enabled = true;
+}
+
+private void DeverrouillerChampsDvd()
+{
+    txbDvdTitre.ReadOnly = false;
+    txbDvdRealisateur.ReadOnly = false;
+    txbDvdDuree.ReadOnly = false;
+    txbDvdSynopsis.ReadOnly = false;
+    txbDvdImage.ReadOnly = false;
+}
     }
 }
 

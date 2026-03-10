@@ -1,4 +1,7 @@
-﻿namespace MediaTekDocuments.model
+﻿using System;
+using System.ComponentModel;
+
+namespace MediaTekDocuments.model
 {
     /// <summary>
     /// Classe métier Revue hérite de Document
@@ -8,6 +11,8 @@
         public string Periodicite { get; set; }
         public int DelaiMiseADispo { get; set; }
         public string Editeur { get; set; }
+        
+        public DateTime DateFinAbonnement { get; set; }
 
         public Revue(string id, string titre, string image, string idGenre, string genre,
             string idPublic, string lePublic, string idRayon, string rayon,

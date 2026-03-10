@@ -62,6 +62,12 @@
     <Compile Include="view\FrmMediatek.Designer.cs">
       <DependentUpon>FrmMediatek.cs</DependentUpon>
     </Compile>
+    <Compile Include="view\FrmAuthentification.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="view\FrmAuthentification.Designer.cs">
+      <DependentUpon>FrmAuthentification.cs</DependentUpon>
+    </Compile>
     <Compile Include="model\Abonnement.cs" />
     <Compile Include="model\Categorie.cs" />
     <Compile Include="model\Commande.cs" />
@@ -77,6 +83,7 @@
     <Compile Include="model\Rayon.cs" />
     <Compile Include="model\Revue.cs" />
     <Compile Include="model\Suivi.cs" />
+    <Compile Include="model\Utilisateur.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

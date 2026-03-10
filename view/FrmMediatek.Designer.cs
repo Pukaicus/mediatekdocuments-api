@@ -33,6 +33,7 @@ namespace MediaTekDocuments.view
             this.tabCommandesLivres = new System.Windows.Forms.TabPage();
             this.tabCommandesDvd = new System.Windows.Forms.TabPage();
             this.tabCommandesRevues = new System.Windows.Forms.TabPage();
+            this.btnLivresExemplairesSuppr = new System.Windows.Forms.Button();
             this.tabLivres = new System.Windows.Forms.TabPage();
             this.btnDvdAjouter = new System.Windows.Forms.Button();
             this.btnDvdModifier = new System.Windows.Forms.Button();
@@ -2100,8 +2101,8 @@ namespace MediaTekDocuments.view
         private System.Windows.Forms.Button btnRevuesModifier;
         private System.Windows.Forms.Button btnRevuesSupprimer;
         private System.Windows.Forms.DataGridView dgvLivresExemplaires;
-        private System.Windows.Forms.Label lblLivresExemplaires;
-        private System.Windows.Forms.ComboBox cbxLivresExemplairesEtats;
+        //private System.Windows.Forms.Label lblLivresExemplaires;
+        //private System.Windows.Forms.ComboBox cbxLivresExemplairesEtats;
         private System.Windows.Forms.Button btnLivresExemplairesSuppr;
     }
 }

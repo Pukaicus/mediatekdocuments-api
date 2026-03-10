@@ -1,6 +1,20 @@
+using System;
+using System.Windows.Forms;
 using MediaTekDocuments.model;
 using MediaTekDocuments.controller;
-       
+
+namespace MediaTekDocuments.view
+{
+    public partial class FrmAuthentification : Form
+    {
+        private FrmMediatekController controller;
+
+        public FrmAuthentification()
+        {
+            InitializeComponent();
+            this.controller = new FrmMediatekController();
+        }
+
         /// <summary>
         /// Événement du bouton Se Connecter
         /// </summary>
@@ -14,11 +28,17 @@ using MediaTekDocuments.controller;
             if (utilisateur != null)
             {
                 FrmMediatek frmMediatek = new FrmMediatek(utilisateur);
+                
+                frmMediatek.FormClosed += (s, args) => Application.Exit(); 
+                
                 frmMediatek.Show();
-                this.Hide();
+                
+                this.Hide(); 
             }
             else
             {
                 MessageBox.Show("Identifiants incorrects.", "Erreur d'authentification");
             }
         }
+    }
+}

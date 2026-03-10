@@ -30,6 +30,8 @@ namespace MediaTekDocuments.view
         private const string STR_SUIVI = "Suivi";
         private const string STR_CONFIRMATION = "Confirmation";
         private const string STR_ENREGISTRER = "Enregistrer";
+        private Livre dernierLivreSelectionne = null;
+        private Utilisateur utilisateur;
         private const string STR_INFO = "Information";
         #region Commun
         private readonly FrmMediatekController controller;
@@ -38,9 +40,10 @@ namespace MediaTekDocuments.view
         /// <summary>
         /// Constructeur : création du contrôleur lié à ce formulaire
         /// </summary>
-        internal FrmMediatek(Utilisateur utilisateur)
+        public FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
+            this.utilisateur = utilisateur;
             this.controller = new FrmMediatekController();
             InitCommandesLivres();
             InitCommandesDvd();
@@ -530,12 +533,15 @@ namespace MediaTekDocuments.view
             {
                 Exemplaire exemplaire = (Exemplaire)dgvLivresExemplaires.CurrentRow.DataBoundItem;
 
-                if (MessageBox.Show($"Voulez-vous vraiment supprimer l'exemplaire n°{exemplaire.Numero} ?", 
+                if (MessageBox.Show($"Voulez-vous vraiment supprimer l'exemplaire n°{exemplaire.Numero} ?",
                     "Confirmation de suppression", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     if (controller.SupprimerExemplaire(exemplaire))
                     {
-                        RemplirLivresExemplaires(dernierLivreSelectionne);
+                        if (dernierLivreSelectionne != null)
+                        {
+                            RemplirLivresListe(controller.GetAllLivres()); 
+                        }
                         MessageBox.Show("Exemplaire supprimé avec succès.", "Information");
                     }
                     else
@@ -556,11 +562,21 @@ namespace MediaTekDocuments.view
         /// <param name="utilisateur">L'objet Utilisateur authentifié</param>
         private void GestionAcces(Utilisateur utilisateur)
         {
+            if (utilisateur == null) 
+            {
+                MessageBox.Show("Erreur : Impossible de récupérer les infos de l'utilisateur.");
+                return; 
+            }
+
+            MessageBox.Show("Le service reçu est : '" + utilisateur.Service + "'");
+
             if (utilisateur.Service == "Prêts")
             {
-                tabCommandes.Visible = false;
-                tabSuivi.Visible = false;
-                btnSupprimerExemplaire.Enabled = false;
+                tabCommandesLivres.Visible = false;
+                tabCommandesDvd.Visible = false;
+                tabCommandesRevues.Visible = false;
+                
+                btnLivresExemplairesSuppr.Enabled = false;
             }
 
             if (utilisateur.Service == "Administratif")
@@ -569,10 +585,9 @@ namespace MediaTekDocuments.view
             }
 
             if (utilisateur.Service == "Culture")
-            {
-                MessageBox.Show("Vos droits ne sont pas suffisants pour accéder à cette application.", 
-                    "Accès refusé", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                Application.Exit();
+            {   
+                MessageBox.Show("Accès refusé");
+                // Application.Exit();
             }
         }
 
@@ -807,6 +822,7 @@ namespace MediaTekDocuments.view
                 try
                 {
                     Livre livre = (Livre)bdgLivresListe.List[bdgLivresListe.Position];
+                    this.dernierLivreSelectionne = livre;
                     AfficheLivresInfos(livre);
                 }
                 catch

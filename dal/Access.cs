@@ -60,6 +60,15 @@ namespace MediaTekDocuments.dal
         }
 
         /// <summary>
+        /// Interroge l'API pour vérifier les identifiants
+        /// </summary>
+        public Utilisateur Authentification(string login, string pwd)
+        {
+           List<Utilisateur> liste = TraitementRecup<Utilisateur>("authentification/" + login + "/" + pwd, "", ""); 
+                 return (liste != null && liste.Count > 0) ? liste[0] : null;
+        }
+
+        /// <summary>
         /// Création et retour de l'instance unique de la classe
         /// </summary>
         /// <returns>instance unique de la classe</returns>

@@ -7,6 +7,8 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System.Linq;
+using System.Configuration;
+using System.IO;
 
 namespace MediaTekDocuments.dal
 {
@@ -18,7 +20,7 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/";
+        private static readonly string uriApi = ConfigurationManager.AppSettings["UriApi"];
         /// <summary>
         /// instance unique de la classe
         /// </summary>
@@ -44,17 +46,23 @@ namespace MediaTekDocuments.dal
         /// Méthode privée pour créer un singleton
         /// initialise l'accès à l'API
         /// </summary>
+
+        /// <summary>
+        /// Constructeur privé pour le pattern Singleton de la classe Access
+        /// </summary>
         private Access()
         {
-            String authenticationString;
             try
             {
-                authenticationString = "admin:adminpwd";
+                string authenticationString = ConfigurationManager.AppSettings["ApiAuthentification"];
                 api = ApiRest.GetInstance(uriApi, authenticationString);
+                
+                LogToFile("SUCCÈS : Accès API initialisé.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                LogToFile("ERREUR CRITIQUE CONSTRUCTEUR : " + e.Message);
                 Environment.Exit(0);
             }
         }
@@ -214,11 +222,17 @@ namespace MediaTekDocuments.dal
             try
             {
                 List<Exemplaire> liste = TraitementRecup<Exemplaire>(POST, "exemplaire", CHAMPS + jsonExemplaire);
+                
+                if (liste != null) {
+                    LogToFile("SUCCÈS : Création exemplaire n°" + exemplaire.Numero);
+                }
+                
                 return (liste != null);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogToFile("ERREUR CreerExemplaire : " + ex.Message);
             }
             return false;
         }
@@ -258,6 +272,7 @@ namespace MediaTekDocuments.dal
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogToFile("ERREUR CreerEntite sur table " + table + " : " + ex.Message);
             }
             return false;
         }
@@ -267,7 +282,6 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public bool ModifierEntite<T>(String table, T objet)
         {
-            // Récupération de l'id pour l'URL
             JObject json = JObject.FromObject(objet);
             String id = (String)json["Id"];
             String jsonObjet = JsonConvert.SerializeObject(objet, new CustomDateTimeConverter());
@@ -279,6 +293,7 @@ namespace MediaTekDocuments.dal
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogToFile("ERREUR ModifierEntite sur table " + table + " (ID:" + id + ") : " + ex.Message);
             }
             return false;
         }
@@ -299,6 +314,7 @@ namespace MediaTekDocuments.dal
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogToFile("ERREUR SupprimerEntite sur table " + table + " (ID:" + id + ") : " + ex.Message);
             }
             return false;
         }
@@ -313,30 +329,32 @@ namespace MediaTekDocuments.dal
         /// <returns>liste d'objets récupérés (ou liste vide)</returns>
         private List<T> TraitementRecup<T> (String methode, String message, String parametres)
         {
-            // trans
             List<T> liste = new List<T>();
             try
             {
                 JObject retour = api.RecupDistant(methode, message, parametres);
-                // extraction du code retourné
                 String code = (String)retour["code"];
                 if (code.Equals("200"))
                 {
-                    // dans le cas du GET (select), récupération de la liste d'objets
                     if (methode.Equals(GET))
                     {
                         String resultString = JsonConvert.SerializeObject(retour["result"]);
-                        // construction de la liste d'objets à partir du retour de l'api
                         liste = JsonConvert.DeserializeObject<List<T>>(resultString, new CustomBooleanJsonConverter());
                     }
                 }
                 else
                 {
-                    Console.WriteLine("code erreur = " + code + " message = " + (String)retour["message"]);
+                    String errorMsg = "code erreur = " + code + " message = " + (String)retour["message"];
+                    Console.WriteLine(errorMsg);
+                    LogToFile("ERREUR API : " + errorMsg);
                 }
-            }catch(Exception e)
+            }
+            catch(Exception e)
             {
-                Console.WriteLine("Erreur lors de l'accès à l'API : "+e.Message);
+                String exceptionMsg = "Erreur lors de l'accès à l'API : " + e.Message;
+                Console.WriteLine(exceptionMsg);
+                LogToFile("EXCEPTION CRITIQUE : " + exceptionMsg);
+                
                 Environment.Exit(0);
             }
             return liste;
@@ -381,6 +399,25 @@ namespace MediaTekDocuments.dal
             public override void WriteJson(JsonWriter writer, bool value, JsonSerializer serializer)
             {
                 serializer.Serialize(writer, value);
+            }
+        }
+
+        /// <summary>
+        /// Enregistre un message dans le fichier logs.txt avec horodatage
+        /// </summary>
+        /// <param name="message">Texte à consigner</param>
+        private static void LogToFile(string message)
+        {
+            try
+            {
+               string logPath = "logs.txt";
+              string logLine = $"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] - {message}{Environment.NewLine}";
+        
+            File.AppendAllText(logPath, logLine);
+            }
+            catch (Exception ex)
+            {
+               Console.WriteLine("Erreur écriture log : " + ex.Message);
             }
         }
 

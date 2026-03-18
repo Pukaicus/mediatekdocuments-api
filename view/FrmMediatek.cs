@@ -22,7 +22,7 @@ namespace MediaTekDocuments.view
         private readonly BindingSource bdgLivresListe = new BindingSource();
         private readonly BindingSource bdgDvdListe = new BindingSource();
         private readonly BindingSource bdgRevuesListe = new BindingSource();
-        private const string MSG_INTROUVABLE = "Information non trouvée";
+        private const string MSG_INTROUVABLE = STR_INFO + "non trouvée";
         private const string ETAT_AJOUTER = "Ajouter";
         private const string ETAT_ENREGISTRER = "Enregistrer";
         private const string ETAT_MODIFIER = "Modifier";
@@ -31,10 +31,10 @@ namespace MediaTekDocuments.view
         private const string STR_CONFIRMATION = "Confirmation";
         private const string STR_ENREGISTRER = "Enregistrer";
         private Livre dernierLivreSelectionne = null;
-        private Utilisateur utilisateur;
         private const string STR_INFO = "Information";
         #region Commun
         private readonly FrmMediatekController controller;
+        private Utilisateur utilisateur;
 
 
         /// <summary>
@@ -43,6 +43,7 @@ namespace MediaTekDocuments.view
         public FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
+            return;
             this.utilisateur = utilisateur;
             this.controller = new FrmMediatekController();
             InitCommandesLivres();
@@ -64,7 +65,7 @@ namespace MediaTekDocuments.view
             txbComLivresNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
             Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
             
-            lblComLivresInfos = new Label { Text = "Informations livre : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            lblComLivresInfos = new Label { Text = STR_INFO + "livre : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
             
             btnRechercher.Click += (s, e) => { ChargerCommandesLivre(txbComLivresNum.Text); };
 
@@ -135,7 +136,7 @@ namespace MediaTekDocuments.view
             else
             {
                 MessageBox.Show("Numéro de livre introuvable.");
-                lblComLivresInfos.Text = "Informations livre : ";
+                lblComLivresInfos.Text = STR_INFO + "livre : ";
                 dgvComLivres.DataSource = null;
             }
         }
@@ -230,7 +231,7 @@ namespace MediaTekDocuments.view
             Label lblNum = new Label { Text = "Numéro DVD :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
             txbComDvdNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
             Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
-            lblComDvdInfos = new Label { Text = "Informations DVD : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            lblComDvdInfos = new Label { Text = STR_INFO + "DVD : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
             btnRechercher.Click += (s, e) => { ChargerCommandesDvd(txbComDvdNum.Text); };
 
             dgvComDvd = new DataGridView {
@@ -367,7 +368,7 @@ namespace MediaTekDocuments.view
             Label lblNum = new Label { Text = "Numéro revue :", Location = new System.Drawing.Point(20, 20), Size = new System.Drawing.Size(100, 20) };
             txbComRevuesNum = new TextBox { Location = new System.Drawing.Point(130, 20), Width = 80 };
             Button btnRechercher = new Button { Text = "Chercher", Location = new System.Drawing.Point(220, 18) };
-            lblComRevuesInfos = new Label { Text = "Informations revue : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
+            lblComRevuesInfos = new Label { Text = STR_INFO + "revue : ", Location = new System.Drawing.Point(320, 20), Size = new System.Drawing.Size(400, 20), Font = new System.Drawing.Font(DefaultFont, System.Drawing.FontStyle.Bold) };
             
             btnRechercher.Click += (s, e) => { ChargerCommandesRevue(txbComRevuesNum.Text); };
 
@@ -434,7 +435,7 @@ namespace MediaTekDocuments.view
             else
             {
                 MessageBox.Show("Numéro de revue introuvable.");
-                lblComRevuesInfos.Text = "Informations revue : ";
+                lblComRevuesInfos.Text = STR_INFO + "revue : ";
                 dgvComRevues.DataSource = null;
             }
         }
@@ -542,7 +543,7 @@ namespace MediaTekDocuments.view
                         {
                             RemplirLivresListe(controller.GetAllLivres()); 
                         }
-                        MessageBox.Show("Exemplaire supprimé avec succès.", "Information");
+                        MessageBox.Show("Exemplaire supprimé avec succès.", STR_INFO);
                     }
                     else
                     {
@@ -552,7 +553,7 @@ namespace MediaTekDocuments.view
             }
             else
             {
-                MessageBox.Show("Veuillez sélectionner un exemplaire à supprimer.", "Information");
+                MessageBox.Show("Veuillez sélectionner un exemplaire à supprimer.", STR_INFO);
             }
         }
 
@@ -587,7 +588,7 @@ namespace MediaTekDocuments.view
             if (utilisateur.Service == "Culture")
             {   
                 MessageBox.Show("Accès refusé");
-                // Application.Exit();
+                Application.Exit();
             }
         }
 
@@ -2014,14 +2015,14 @@ namespace MediaTekDocuments.view
                 }
                 catch
                 {
-                    MessageBox.Show("le numéro de parution doit être numérique", "Information");
+                    MessageBox.Show("le numéro de parution doit être numérique", STR_INFO);
                     txbReceptionExemplaireNumero.Text = "";
                     txbReceptionExemplaireNumero.Focus();
                 }
             }
             else
             {
-                MessageBox.Show("numéro de parution obligatoire", "Information");
+                MessageBox.Show("numéro de parution obligatoire", STR_INFO);
             }
         }
 

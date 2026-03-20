@@ -62,34 +62,49 @@ namespace MediaTekDocuments.manager
         /// <returns>liste d'objets (select) ou liste vide (ok) ou null si erreur</returns>
         public JObject RecupDistant(string methode, string message, String parametres)
         {
-            // transformation des paramètres pour les mettre dans le body
-            StringContent content = null;
-            if(!(parametres is null))
+            try
             {
-                content = new StringContent(parametres, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+                StringContent content = null;
+                if (!(parametres is null))
+                {
+                    content = new StringContent(parametres, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+                }
+
+                switch (methode)
+                {
+                    case "GET":
+                        httpResponse = httpClient.GetAsync(message).Result;
+                        break;
+                    case "POST":
+                        httpResponse = httpClient.PostAsync(message, content).Result;
+                        break;
+                    case "PUT":
+                        httpResponse = httpClient.PutAsync(message, content).Result;
+                        break;
+                    case "DELETE":
+                        httpResponse = httpClient.DeleteAsync(message).Result;
+                        break;
+                    default:
+                        return new JObject();
+                }
+
+                if (httpResponse != null && httpResponse.Content != null)
+                {
+                    var json = httpResponse.Content.ReadAsStringAsync().Result;
+                    
+                    if (string.IsNullOrEmpty(json) || !json.Trim().StartsWith("{"))
+                    {
+                        return null; 
+                    }
+                    
+                    return JObject.Parse(json);
+                }
             }
-            // envoi du message et attente de la réponse
-            switch (methode)
+            catch (Exception)
             {
-                case "GET":
-                    httpResponse = httpClient.GetAsync(message).Result;
-                    break;
-                case "POST":
-                    httpResponse = httpClient.PostAsync(message, content).Result;
-                    break;
-                case "PUT":
-                    httpResponse = httpClient.PutAsync(message, content).Result;
-                    break;
-                case "DELETE":
-                    httpResponse = httpClient.DeleteAsync(message).Result;
-                    break;
-                // methode incorrecte
-                default:
-                    return new JObject();
+                return null;
             }
-            // récupération de l'information retournée par l'api
-            var json = httpResponse.Content.ReadAsStringAsync().Result; 
-            return JObject.Parse(json);
+            return null;
         }
 
     }

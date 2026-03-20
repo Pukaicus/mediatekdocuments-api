@@ -73,7 +73,9 @@ namespace MediaTekDocuments.dal
         {
             try
             {
-                List<Utilisateur> liste = TraitementRecup<Utilisateur>("utilisateur", login, "");
+                string route = "index.php?table=utilisateur&id=" + login;
+                
+                List<Utilisateur> liste = TraitementRecup<Utilisateur>(GET, route, null);
 
                 if (liste != null && liste.Count > 0)
                 {
@@ -81,7 +83,7 @@ namespace MediaTekDocuments.dal
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("L'API a répondu mais l'utilisateur est introuvable ou la réponse est mal formée.");
+                    System.Windows.Forms.MessageBox.Show("Accès refusé ou utilisateur inconnu.");
                 }
             }
             catch (Exception ex)
@@ -110,8 +112,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Genre</returns>
         public List<Categorie> GetAllGenres()
         {
-            IEnumerable<Genre> lesGenres = TraitementRecup<Genre>(GET, "genre", null);
-            return new List<Categorie>(lesGenres);
+            return TraitementRecup<Genre>(GET, "index.php?table=genre", null).Cast<Categorie>().ToList();
         }
 
         /// <summary>
@@ -120,8 +121,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Rayon</returns>
         public List<Categorie> GetAllRayons()
         {
-            IEnumerable<Rayon> lesRayons = TraitementRecup<Rayon>(GET, "rayon", null);
-            return new List<Categorie>(lesRayons);
+            return TraitementRecup<Rayon>(GET, "index.php?table=rayon", null).Cast<Categorie>().ToList();
         }
 
         /// <summary>
@@ -130,8 +130,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Public</returns>
         public List<Categorie> GetAllPublics()
         {
-            IEnumerable<Public> lesPublics = TraitementRecup<Public>(GET, "public", null);
-            return new List<Categorie>(lesPublics);
+            return TraitementRecup<Public>(GET, "index.php?table=public", null).Cast<Categorie>().ToList();
         }
 
         /// <summary>
@@ -140,8 +139,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Livre</returns>
         public List<Livre> GetAllLivres()
         {
-            List<Livre> lesLivres = TraitementRecup<Livre>(GET, "livre", null);
-            return lesLivres;
+            return TraitementRecup<Livre>(GET, "index.php?table=livre", null);
         }
 
         /// <summary>
@@ -150,8 +148,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Dvd</returns>
         public List<Dvd> GetAllDvd()
         {
-            List<Dvd> lesDvd = TraitementRecup<Dvd>(GET, "dvd", null);
-            return lesDvd;
+            return TraitementRecup<Dvd>(GET, "index.php?table=dvd", null);
         }
 
         /// <summary>
@@ -160,8 +157,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Revue</returns>
         public List<Revue> GetAllRevues()
         {
-            List<Revue> lesRevues = TraitementRecup<Revue>(GET, "revue", null);
-            return lesRevues;
+            return TraitementRecup<Revue>(GET, "index.php?table=revue", null);
         }
 
 
@@ -170,7 +166,7 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public List<Livre> GetLivre(string id)
         {
-            return TraitementRecup<Livre>(GET, "livre/" + id, null);
+            return TraitementRecup<Livre>(GET, "index.php?table=livre&id=" + id, null) ?? new List<Livre>();
         }
 
         /// <summary>
@@ -178,7 +174,7 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public List<Dvd> GetDvd(string id)
         {
-            return TraitementRecup<Dvd>(GET, "dvd/" + id, null);
+            return TraitementRecup<Dvd>(GET, "index.php?table=dvd&id=" + id, null) ?? new List<Dvd>();
         }
 
         /// <summary>
@@ -186,7 +182,7 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public List<Revue> GetRevue(string id)
         {
-            return TraitementRecup<Revue>(GET, "revue/" + id, null);
+            return TraitementRecup<Revue>(GET, "index.php?table=revue&id=" + id, null) ?? new List<Revue>();
         }
 
         /// <summary>
@@ -194,7 +190,7 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public List<Abonnement> GetAbonnements(string idRevue)
         {
-            return TraitementRecup<Abonnement>(GET, "abonnement/" + idRevue, null);
+            return TraitementRecup<Abonnement>(GET, "index.php?table=abonnement&id=" + idRevue, null) ?? new List<Abonnement>();
         }
 
         /// <summary>
@@ -202,7 +198,7 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public List<Abonnement> GetAbonnementsEcheance()
         {
-            return TraitementRecup<Abonnement>(GET, "abonnements_echeance", null);
+            return TraitementRecup<Abonnement>(GET, "index.php?table=abonnements_echeance", null) ?? new List<Abonnement>();
         }
 
         // --- ALIAS POUR LES ACTIONS (DVD/REVUES) ---
@@ -342,16 +338,28 @@ namespace MediaTekDocuments.dal
         /// <param name="message">information envoyée dans l'url</param>
         /// <param name="parametres">paramètres à envoyer dans le body, au format "chp1=val1&chp2=val2&..."</param>
         /// <returns>liste d'objets récupérés (ou liste vide)</returns>
-        private List<T> TraitementRecup<T> (String methode, String message, String parametres)
+        private List<T> TraitementRecup<T>(String methode, String message, String parametres)
         {
             List<T> liste = new List<T>();
             try
             {
-                JObject retour = api.RecupDistant(methode, message, parametres);
-                String code = (String)retour["code"];
-                if (code.Equals("200"))
+                if (api == null)
                 {
-                    if (methode.Equals(GET))
+                    LogToFile("ERREUR : L'objet 'api' est NULL.");
+                    return liste;
+                }
+
+                JObject retour = api.RecupDistant(methode, message, parametres);
+
+                if (retour == null)
+                {
+                    LogToFile("ERREUR : RecupDistant a renvoyé NULL.");
+                    return liste;
+                }
+
+                if (retour["code"] != null && retour["code"].ToString().Equals("200"))
+                {
+                    if (methode.Equals(GET) && retour["result"] != null)
                     {
                         String resultString = JsonConvert.SerializeObject(retour["result"]);
                         liste = JsonConvert.DeserializeObject<List<T>>(resultString, new CustomBooleanJsonConverter());
@@ -359,18 +367,14 @@ namespace MediaTekDocuments.dal
                 }
                 else
                 {
-                    String errorMsg = "code erreur = " + code + " message = " + (String)retour["message"];
-                    Console.WriteLine(errorMsg);
-                    LogToFile("ERREUR API : " + errorMsg);
+                    String code = retour["code"]?.ToString() ?? "Inconnu";
+                    String msg = retour["message"]?.ToString() ?? "Pas de message";
+                    LogToFile("ERREUR API : code=" + code + " msg=" + msg);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                String exceptionMsg = "Erreur lors de l'accès à l'API : " + e.Message;
-                Console.WriteLine(exceptionMsg);
-                LogToFile("EXCEPTION CRITIQUE : " + exceptionMsg);
-                
-                Environment.Exit(0);
+                LogToFile("EXCEPTION CRITIQUE : Erreur lors de l'accès à l'API : " + e.Message);
             }
             return liste;
         }

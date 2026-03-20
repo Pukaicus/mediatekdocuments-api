@@ -20,7 +20,7 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        private static readonly string uriApi = ConfigurationManager.AppSettings["UriApi"];
+        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/src/";
         /// <summary>
         /// instance unique de la classe
         /// </summary>
@@ -54,16 +54,15 @@ namespace MediaTekDocuments.dal
         {
             try
             {
-                string authenticationString = ConfigurationManager.AppSettings["ApiAuthentification"];
+                string authenticationString = ConfigurationManager.AppSettings["ApiAuthentification"] ?? "admin:adminpwd";
                 api = ApiRest.GetInstance(uriApi, authenticationString);
                 
                 LogToFile("SUCCÈS : Accès API initialisé.");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
                 LogToFile("ERREUR CRITIQUE CONSTRUCTEUR : " + e.Message);
-                Environment.Exit(0);
+                System.Windows.Forms.MessageBox.Show("Erreur Constructeur : " + e.Message);
             }
         }
 
@@ -72,8 +71,24 @@ namespace MediaTekDocuments.dal
         /// </summary>
         public Utilisateur Authentification(string login, string pwd)
         {
-           List<Utilisateur> liste = TraitementRecup<Utilisateur>("authentification/" + login + "/" + pwd, "", ""); 
-                 return (liste != null && liste.Count > 0) ? liste[0] : null;
+            try
+            {
+                List<Utilisateur> liste = TraitementRecup<Utilisateur>("utilisateur", login, "");
+
+                if (liste != null && liste.Count > 0)
+                {
+                    return liste[0];
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("L'API a répondu mais l'utilisateur est introuvable ou la réponse est mal formée.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Erreur lors de l'appel API : " + ex.Message);
+            }
+            return null;
         }
 
         /// <summary>

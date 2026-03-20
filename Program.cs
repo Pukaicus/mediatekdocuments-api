@@ -14,7 +14,20 @@ namespace MediaTekDocuments
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmAuthentification());
+
+            try
+            {
+                Application.Run(new FrmAuthentification());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur au démarrage de l'application :\n\n" + 
+                                "Message : " + ex.Message + "\n\n" +
+                                "Détails : " + ex.InnerException?.Message, 
+                                "Crash de l'application", 
+                                MessageBoxButtons.OK, 
+                                MessageBoxIcon.Error);
+            }
         }
     }
 }

@@ -595,21 +595,6 @@ namespace MediaTekDocuments.view
 
 
 
-        /// <summary>
-        /// Rempli un des 3 combo (genre, public, rayon)
-        /// </summary>
-        /// <param name="lesCategories">liste des objets de type Genre ou Public ou Rayon</param>
-        /// <param name="bdg">bindingsource contenant les informations</param>
-        /// <param name="cbx">combobox à remplir</param>
-        public static void RemplirComboCategorie(List<Categorie> lesCategories, BindingSource bdg, ComboBox cbx)
-        {
-            bdg.DataSource = lesCategories;
-            cbx.DataSource = bdg;
-            if (cbx.Items.Count > 0)
-            {
-                cbx.SelectedIndex = -1;
-            }
-        }
         #endregion
 
         #region Onglet Livres
@@ -621,12 +606,18 @@ namespace MediaTekDocuments.view
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        /// <summary>
+        /// Événement lors de l'entrée dans l'onglet des livres
+        /// </summary>
         private void TabLivres_Enter(object sender, EventArgs e)
         {
+            if (controller == null) return;
             lesLivres = controller.GetAllLivres();
+
             RemplirComboCategorie(controller.GetAllGenres(), bdgGenres, cbxLivresGenres);
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cbxLivresPublics);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cbxLivresRayons);
+
             RemplirLivresListeComplete();
         }
 
@@ -634,19 +625,81 @@ namespace MediaTekDocuments.view
         /// Remplit le dategrid avec la liste reçue en paramètre
         /// </summary>
         /// <param name="livres">liste de livres</param>
+        /// <summary>
+        /// Remplit le DataGridView avec la liste des livres
+        /// </summary>
+        /// <param name="livres">Liste des livres à afficher</param>
         private void RemplirLivresListe(List<Livre> livres)
         {
-            bdgLivresListe.DataSource = livres;
-            dgvLivresListe.DataSource = bdgLivresListe;
-            dgvLivresListe.Columns["isbn"].Visible = false;
-            dgvLivresListe.Columns["idRayon"].Visible = false;
-            dgvLivresListe.Columns["idGenre"].Visible = false;
-            dgvLivresListe.Columns["idPublic"].Visible = false;
-            dgvLivresListe.Columns["image"].Visible = false;
-            dgvLivresListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-            dgvLivresListe.Columns["id"].DisplayIndex = 0;
-            dgvLivresListe.Columns["titre"].DisplayIndex = 1;
+            if (bdgLivresListe != null && livres != null)
+            {
+                bdgLivresListe.DataSource = livres;
+                dgvLivresListe.DataSource = bdgLivresListe;
+
+                if (livres.Count > 0)
+                {
+                    dgvLivresListe.Columns["isbn"].Visible = false;
+                    dgvLivresListe.Columns["idRayon"].Visible = false;
+                    dgvLivresListe.Columns["idGenre"].Visible = false;
+                    dgvLivresListe.Columns["idPublic"].Visible = false;
+                    dgvLivresListe.Columns["image"].Visible = false;
+                    
+                    dgvLivresListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                    
+                    dgvLivresListe.Columns["id"].DisplayIndex = 0;
+                    dgvLivresListe.Columns["titre"].DisplayIndex = 1;
+                }
+            }
         }
+
+        /// <summary>
+        /// Événement lors de l'entrée dans l'onglet des parutions
+        /// </summary>
+        private void tabParutions_Enter(object sender, EventArgs e)
+        {
+            if (controller == null) return;
+
+            if (dgvRevuesListe != null && dgvRevuesListe.CurrentRow != null)
+            {
+                Revue revue = (Revue)bdgRevuesListe.List[dgvRevuesListe.CurrentRow.Index];
+                
+                List<Exemplaire> lesExemplaires = controller.GetExemplairesRevue(revue.Id);
+                
+                if (lesExemplaires != null && bdgExemplairesListe != null)
+                {
+                    bdgExemplairesListe.DataSource = lesExemplaires;
+                    
+                    if (dgvReceptionExemplairesListe != null)
+                    {
+                        dgvReceptionExemplairesListe.DataSource = bdgExemplairesListe;
+                    }
+                }
+            }
+            else
+            {
+                if (dgvReceptionExemplairesListe != null)
+                {
+                    dgvReceptionExemplairesListe.DataSource = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Événement lors de l'entrée dans l'onglet des commandes de livres
+        /// </summary>
+        private void tabCommandesLivres_Enter(object sender, EventArgs e)
+        {
+            if (controller == null) return;
+
+            List<CommandeDocument> lesCommandes = controller.GetAllCommandesLivres();
+
+            if (lesCommandes != null && bdgCommandesLivresListe != null)
+            {
+                bdgCommandesLivresListe.DataSource = lesCommandes;
+                dgvCommandesLivresListe.DataSource = bdgCommandesLivresListe;
+            }
+        }
+        
 
         /// <summary>
         /// Recherche et affichage du livre dont on a saisi le numéro.
@@ -871,9 +924,16 @@ namespace MediaTekDocuments.view
         /// Affichage de la liste complète des livres
         /// et annulation de toutes les recherches et filtres
         /// </summary>
+        /// <summary>
+        /// Remplit la liste complète des livres et vide les zones de saisie
+        /// </summary>
         private void RemplirLivresListeComplete()
         {
-            RemplirLivresListe(lesLivres);
+            if (lesLivres != null)
+            {
+                RemplirLivresListe(lesLivres);
+            }
+            
             VideLivresZones();
         }
 
@@ -1209,11 +1269,37 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void tabDvd_Enter(object sender, EventArgs e)
         {
+            if (controller == null) return;
             lesDvd = controller.GetAllDvd();
+
             RemplirComboCategorie(controller.GetAllGenres(), bdgGenres, cbxDvdGenres);
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cbxDvdPublics);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cbxDvdRayons);
+
             RemplirDvdListeComplete();
+        }
+
+        /// <summary>
+        /// Remplit une ComboBox avec les catégories (Genres, Rayons, Publics)
+        /// de manière sécurisée
+        /// </summary>
+        /// <summary>
+        /// Remplit une ComboBox avec les catégories de manière sécurisée
+        /// </summary>
+        private void RemplirComboCategorie(List<Categorie> lesCategories, BindingSource bdg, ComboBox cbx)
+        {
+            if (lesCategories != null && bdg != null && cbx != null)
+            {
+                bdg.DataSource = lesCategories;
+                cbx.DataSource = bdg;
+                cbx.DisplayMember = "libelle";
+                cbx.ValueMember = "id";
+
+                if (cbx.Items.Count > 0)
+                {
+                    cbx.SelectedIndex = -1;
+                }
+            }
         }
 
         /// <summary>
@@ -1523,10 +1609,13 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void tabRevues_Enter(object sender, EventArgs e)
         {
+            if (controller == null) return;
             lesRevues = controller.GetAllRevues();
+
             RemplirComboCategorie(controller.GetAllGenres(), bdgGenres, cbxRevuesGenres);
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cbxRevuesPublics);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cbxRevuesRayons);
+
             RemplirRevuesListeComplete();
         }
 
@@ -1831,12 +1920,34 @@ namespace MediaTekDocuments.view
         /// <summary>
         /// Ouverture de l'onglet : récupère le revues et vide tous les champs.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void tabReceptionRevue_Enter(object sender, EventArgs e)
         {
-            lesRevues = controller.GetAllRevues();
-            txbReceptionRevueNumero.Text = "";
+            if (controller == null) return;
+
+            if (dgvRevuesListe != null && dgvRevuesListe.CurrentRow != null && bdgRevuesListe.List.Count > 0)
+            {
+                Revue revue = (Revue)bdgRevuesListe.List[dgvRevuesListe.CurrentRow.Index];
+                
+                List<Exemplaire> lesExemplaires = controller.GetExemplairesRevue(revue.Id);
+                
+                if (lesExemplaires != null && bdgExemplairesListe != null)
+                {
+                    bdgExemplairesListe.DataSource = lesExemplaires;
+                    
+                    if (dgvReceptionExemplairesListe != null) 
+                    {
+                        dgvReceptionExemplairesListe.DataSource = bdgExemplairesListe;
+                    }
+                }
+            }
+            else
+            {
+                if (dgvReceptionExemplairesListe != null) 
+                {
+                    dgvReceptionExemplairesListe.DataSource = null;
+                }
+                MessageBox.Show("Veuillez d'abord sélectionner une revue dans l'onglet 'Revues'.");
+            }
         }
 
         /// <summary>

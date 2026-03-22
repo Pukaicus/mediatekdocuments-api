@@ -40,6 +40,8 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// méthode HTTP pour update
         
+        private const string DELETE = "DELETE";
+        
         private const string CHAMPS = "champs=";
 
         /// <summary>
@@ -54,7 +56,9 @@ namespace MediaTekDocuments.dal
         {
             try
             {
+                string uriApi = ConfigurationManager.AppSettings["UriApi"] ?? "http://localhost/rest_mediatekdocuments/src/";
                 string authenticationString = ConfigurationManager.AppSettings["ApiAuthentification"] ?? "admin:adminpwd";
+
                 api = ApiRest.GetInstance(uriApi, authenticationString);
                 
                 LogToFile("SUCCÈS : Accès API initialisé.");
@@ -112,7 +116,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Genre</returns>
         public List<Categorie> GetAllGenres()
         {
-            return TraitementRecup<Genre>(GET, "index.php?table=genre", null).Cast<Categorie>().ToList();
+            var res = TraitementRecup<Genre>(GET, "index.php?table=genre", null);
+            return res?.Cast<Categorie>().ToList() ?? new List<Categorie>();
         }
 
         /// <summary>
@@ -121,7 +126,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Rayon</returns>
         public List<Categorie> GetAllRayons()
         {
-            return TraitementRecup<Rayon>(GET, "index.php?table=rayon", null).Cast<Categorie>().ToList();
+            var res = TraitementRecup<Rayon>(GET, "index.php?table=rayon", null);
+            return res?.Cast<Categorie>().ToList() ?? new List<Categorie>();
         }
 
         /// <summary>
@@ -130,7 +136,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Public</returns>
         public List<Categorie> GetAllPublics()
         {
-            return TraitementRecup<Public>(GET, "index.php?table=public", null).Cast<Categorie>().ToList();
+            var res = TraitementRecup<Public>(GET, "index.php?table=public", null);
+            return res?.Cast<Categorie>().ToList() ?? new List<Categorie>();
         }
 
         /// <summary>
@@ -139,7 +146,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Livre</returns>
         public List<Livre> GetAllLivres()
         {
-            return TraitementRecup<Livre>(GET, "index.php?table=livre", null);
+            return TraitementRecup<Livre>(GET, "index.php?table=livre", null) ?? new List<Livre>();
         }
 
         /// <summary>
@@ -148,7 +155,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Dvd</returns>
         public List<Dvd> GetAllDvd()
         {
-            return TraitementRecup<Dvd>(GET, "index.php?table=dvd", null);
+            return TraitementRecup<Dvd>(GET, "index.php?table=dvd", null) ?? new List<Dvd>();
         }
 
         /// <summary>
@@ -157,7 +164,7 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Revue</returns>
         public List<Revue> GetAllRevues()
         {
-            return TraitementRecup<Revue>(GET, "index.php?table=revue", null);
+            return TraitementRecup<Revue>(GET, "index.php?table=revue", null) ?? new List<Revue>();
         }
 
 
@@ -217,9 +224,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Exemplaire</returns>
         public List<Exemplaire> GetExemplairesRevue(string idDocument)
         {
-            String jsonIdDocument = convertToJson("id", idDocument);
-            List<Exemplaire> lesExemplaires = TraitementRecup<Exemplaire>(GET, "exemplaire/" + jsonIdDocument, null);
-            return lesExemplaires;
+            var res = TraitementRecup<Exemplaire>(GET, "index.php?table=exemplaire&id=" + idDocument, null);
+            return res ?? new List<Exemplaire>();
         }
 
         /// <summary>
@@ -232,7 +238,7 @@ namespace MediaTekDocuments.dal
             String jsonExemplaire = JsonConvert.SerializeObject(exemplaire, new CustomDateTimeConverter());
             try
             {
-                List<Exemplaire> liste = TraitementRecup<Exemplaire>(POST, "exemplaire", CHAMPS + jsonExemplaire);
+                List<Exemplaire> liste = TraitementRecup<Exemplaire>(POST, "index.php?table=exemplaire", CHAMPS + jsonExemplaire);
                 
                 if (liste != null) {
                     LogToFile("SUCCÈS : Création exemplaire n°" + exemplaire.Numero);
@@ -254,8 +260,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets Suivi</returns>
         public List<Suivi> GetAllSuivi()
         {
-            List<Suivi> lesSuivis = TraitementRecup<Suivi>(GET, "suivi", null);
-            return lesSuivis;
+            var res = TraitementRecup<Suivi>(GET, "index.php?table=suivi", null);
+            return res ?? new List<Suivi>();
         }
 
         /// <summary>
@@ -265,8 +271,8 @@ namespace MediaTekDocuments.dal
         /// <returns>Liste d'objets CommandeDocument</returns>
         public List<CommandeDocument> GetCommandesDocument(string idDocument)
         {
-            List<CommandeDocument> lesCommandes = TraitementRecup<CommandeDocument>(GET, "commandedocument/" + idDocument, null);
-            return lesCommandes;
+            var res = TraitementRecup<CommandeDocument>(GET, "index.php?table=commandedocument&id=" + idDocument, null);
+            return res ?? new List<CommandeDocument>();
         }
 
         /// <summary>
@@ -277,7 +283,7 @@ namespace MediaTekDocuments.dal
             String jsonObjet = JsonConvert.SerializeObject(objet, new CustomDateTimeConverter());
             try
             {
-                List<T> liste = TraitementRecup<T>(POST, table, CHAMPS + jsonObjet);
+                List<T> liste = TraitementRecup<T>(POST, "index.php?table=" + table, CHAMPS + jsonObjet);
                 return (liste != null);
             }
             catch (Exception ex)
@@ -298,7 +304,7 @@ namespace MediaTekDocuments.dal
             String jsonObjet = JsonConvert.SerializeObject(objet, new CustomDateTimeConverter());
             try
             {
-                List<T> liste = TraitementRecup<T>(POST, table + "/" + id, CHAMPS + jsonObjet);
+                List<T> liste = TraitementRecup<T>(POST, "index.php?table=" + table + "&id=" + id, CHAMPS + jsonObjet);
                 return (liste != null);
             }
             catch (Exception ex)
@@ -316,10 +322,9 @@ namespace MediaTekDocuments.dal
         {
             JObject json = JObject.FromObject(objet);
             String id = (String)json["Id"];
-            String jsonId = convertToJson("id", id);
             try
             {
-                List<T> liste = TraitementRecup<T>(POST, "suppr" + table, CHAMPS + jsonId);
+                List<T> liste = TraitementRecup<T>(DELETE, "index.php?table=" + table + "&id=" + id, null);
                 return (liste != null);
             }
             catch (Exception ex)
@@ -429,14 +434,13 @@ namespace MediaTekDocuments.dal
         {
             try
             {
-               string logPath = "logs.txt";
-              string logLine = $"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] - {message}{Environment.NewLine}";
-        
-            File.AppendAllText(logPath, logLine);
+                string logPath = "logs.txt";
+                string logLine = $"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] - {message}{Environment.NewLine}";
+                File.AppendAllText(logPath, logLine);
             }
             catch (Exception ex)
             {
-               Console.WriteLine("Erreur écriture log : " + ex.Message);
+                Console.WriteLine("Erreur écriture log : " + ex.Message);
             }
         }
 

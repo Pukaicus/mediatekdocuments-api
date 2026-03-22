@@ -105,7 +105,7 @@ namespace MediaTekDocuments.view
             this.dgvLivresListe = new System.Windows.Forms.DataGridView();
             this.dgvLivresExemplaires = new System.Windows.Forms.DataGridView();
             this.dgvLivresExemplaires.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvLivresExemplaires.Location = new System.Drawing.Point(20, 550);
+
             this.dgvLivresExemplaires.Name = "dgvLivresExemplaires";
             this.dgvLivresExemplaires.Size = new System.Drawing.Size(600, 200);
             this.dgvLivresExemplaires.TabIndex = 50;
@@ -518,7 +518,10 @@ namespace MediaTekDocuments.view
             this.grpLivresRecherche.Controls.Add(this.label20);
             this.grpLivresRecherche.Controls.Add(this.cbxLivresGenres);
             this.grpLivresRecherche.Controls.Add(this.label14);
-            this.grpLivresRecherche.Controls.Add(this.dgvLivresListe);
+            this.grpLivresRecherche.Controls.Add(this.dgvLivresExemplaires);
+            this.dgvLivresExemplaires.Location = new System.Drawing.Point(9, 360);
+            this.dgvLivresExemplaires.Size = new System.Drawing.Size(844, 150);
+            this.dgvLivresExemplaires.Name = "dgvLivresExemplaires";
             this.grpLivresRecherche.Controls.Add(this.label6);
             this.grpLivresRecherche.Controls.Add(this.txbLivresTitreRecherche);
             this.grpLivresRecherche.Location = new System.Drawing.Point(8, 13);

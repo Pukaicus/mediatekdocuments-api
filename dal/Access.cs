@@ -7,7 +7,6 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System.Linq;
-using System.Configuration;
 using System.IO;
 
 namespace MediaTekDocuments.dal
@@ -45,11 +44,6 @@ namespace MediaTekDocuments.dal
         private const string CHAMPS = "champs=";
 
         /// <summary>
-        /// Méthode privée pour créer un singleton
-        /// initialise l'accès à l'API
-        /// </summary>
-
-        /// <summary>
         /// Constructeur privé pour le pattern Singleton de la classe Access
         /// </summary>
         private Access()
@@ -71,28 +65,35 @@ namespace MediaTekDocuments.dal
         }
 
         /// <summary>
-        /// Interroge l'API pour vérifier les identifiants
+        /// Interroge l'API pour vérifier les identifiants et récupérer l'utilisateur
         /// </summary>
+        /// <param name="login">Identifiant de connexion</param>
+        /// <param name="pwd">Mot de passe</param>
+        /// <returns>Objet Utilisateur ou null si échec</returns>
         public Utilisateur Authentification(string login, string pwd)
         {
             try
             {
-                string route = "index.php?table=utilisateur&id=" + login;
+                string route = "index.php?table=utilisateur&id=" + login + "&pwd=" + pwd;
                 
                 List<Utilisateur> liste = TraitementRecup<Utilisateur>(GET, route, null);
 
                 if (liste != null && liste.Count > 0)
                 {
+                    if (liste[0].idservice == null) 
+                    {
+                        System.Windows.Forms.MessageBox.Show("Alerte : L'utilisateur n'a pas de service associé.");
+                    }
                     return liste[0];
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Accès refusé ou utilisateur inconnu.");
+                    System.Windows.Forms.MessageBox.Show("Identifiants incorrects.");
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Erreur lors de l'appel API : " + ex.Message);
+                System.Windows.Forms.MessageBox.Show("Erreur API : " + ex.Message);
             }
             return null;
         }
@@ -147,6 +148,46 @@ namespace MediaTekDocuments.dal
         public List<Livre> GetAllLivres()
         {
             return TraitementRecup<Livre>(GET, "index.php?table=livre", null) ?? new List<Livre>();
+        }
+
+
+
+        /// <summary>
+        /// Retourne toutes les commandes de livres à partir de la BDD
+        /// </summary>
+        /// <returns>Liste d'objets CommandeDocument</returns>
+        public List<CommandeDocument> GetAllCommandesLivres()
+        {
+            List<CommandeDocument> res = TraitementRecup<CommandeDocument>(GET, "commandedocument", null);
+            return res ?? new List<CommandeDocument>();
+        }
+
+        /// <summary>
+        /// Retourne les commandes d'un document spécifique
+        /// </summary>
+        public List<CommandeDocument> GetCommandesDocument(string idDocument)
+        {
+            var res = TraitementRecup<CommandeDocument>(GET, "commandedocument/" + idDocument, null);
+            return res ?? new List<CommandeDocument>();
+        }
+
+        /// <summary>
+        /// Retourne toutes les commandes de DVD à partir de la BDD
+        /// </summary>
+        /// <returns>Liste d'objets CommandeDocument</returns>
+        public List<CommandeDocument> GetAllCommandesDvd()
+        {
+            return GetAllCommandesLivres();
+        }
+
+        /// <summary>
+        /// Retourne toutes les commandes de revues à partir de la BDD
+        /// </summary>
+        /// <returns>Liste d'objets CommandeDocument</returns>
+        public List<CommandeDocument> GetAllCommandesRevues()
+        {
+            List<CommandeDocument> res = TraitementRecup<CommandeDocument>(GET, "commanderevue", null);
+            return res ?? new List<CommandeDocument>();
         }
 
         /// <summary>
@@ -262,17 +303,6 @@ namespace MediaTekDocuments.dal
         {
             var res = TraitementRecup<Suivi>(GET, "index.php?table=suivi", null);
             return res ?? new List<Suivi>();
-        }
-
-        /// <summary>
-        /// Récupère les commandes d'un document (livre ou dvd)
-        /// </summary>
-        /// <param name="idDocument">id du document concerné</param>
-        /// <returns>Liste d'objets CommandeDocument</returns>
-        public List<CommandeDocument> GetCommandesDocument(string idDocument)
-        {
-            var res = TraitementRecup<CommandeDocument>(GET, "index.php?table=commandedocument&id=" + idDocument, null);
-            return res ?? new List<CommandeDocument>();
         }
 
         /// <summary>

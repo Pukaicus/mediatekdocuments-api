@@ -43,7 +43,6 @@ namespace MediaTekDocuments.view
         public FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
-            return;
             this.utilisateur = utilisateur;
             this.controller = new FrmMediatekController();
             InitCommandesLivres();
@@ -51,6 +50,23 @@ namespace MediaTekDocuments.view
             InitCommandesRevues();
             btnLivresExemplairesSuppr.Click += (s, e) => SupprimerExemplaire();
             GestionAcces(utilisateur);
+        }
+
+        /// <summary>
+        /// Se déclenche à l'ouverture du formulaire
+        /// </summary>
+        private void FrmMediatek_Load(object sender, EventArgs e)
+        {
+            RemplirCombo(controller.GetAllGenres(), cbxLivresGenres, true);
+            RemplirCombo(controller.GetAllPublics(), cbxLivresPublics, true);
+            RemplirCombo(controller.GetAllRayons(), cbxLivresRayons, true);
+
+            RemplirLivresListe(controller.GetAllLivres());
+            
+            RemplirCombo(controller.GetAllGenres(), cbxDvdGenres, true);
+            RemplirCombo(controller.GetAllPublics(), cbxDvdPublics, true);
+            RemplirCombo(controller.GetAllRayons(), cbxDvdRayons, true);
+            RemplirDvdListe(controller.GetAllDvd());
         }
 
         /// <summary>
@@ -2217,6 +2233,27 @@ private void DeverrouillerChampsDvd()
     txbDvdSynopsis.ReadOnly = false;
     txbDvdImage.ReadOnly = false;
 }
+
+        /// <summary>
+        /// Remplit une combo avec les éléments d'une liste
+        /// </summary>
+        /// <param name="lesCategories">Liste des catégories</param>
+        /// <param name="combo">le combo à remplir</param>
+        /// <param name="ajouteVide">true s'il faut ajouter une ligne vide au début</param>
+        private void RemplirCombo(List<Categorie> lesCategories, ComboBox combo, bool ajouteVide)
+        {
+            if (lesCategories == null) return;
+            List<Categorie> lesCategoriesModifiees = new List<Categorie>(lesCategories);
+            if (ajouteVide)
+            {
+                lesCategoriesModifiees.Insert(0, new Categorie("", ""));
+            }
+            combo.DataSource = lesCategoriesModifiees;
+            combo.DisplayMember = "Libelle";
+            combo.ValueMember = "Id";
+            combo.SelectedIndex = -1;
+        }
+
     }
 }
 

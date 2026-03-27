@@ -35,10 +35,6 @@ namespace MediaTekDocuments.view
                 
                 this.Hide(); 
             }
-            else
-            {
-                MessageBox.Show("Identifiants incorrects.", "Erreur d'authentification");
-            }
         }
     }
 }

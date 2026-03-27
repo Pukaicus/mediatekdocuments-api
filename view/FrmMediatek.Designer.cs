@@ -31,6 +31,7 @@ namespace MediaTekDocuments.view
         {
             this.tabOngletsApplication = new System.Windows.Forms.TabControl();
             this.tabCommandesLivres = new System.Windows.Forms.TabPage();
+            this.tabCommandesLivres.Enter += new System.EventHandler(this.tabCommandesLivres_Enter);
             this.tabCommandesDvd = new System.Windows.Forms.TabPage();
             this.tabCommandesRevues = new System.Windows.Forms.TabPage();
             this.btnLivresExemplairesSuppr = new System.Windows.Forms.Button();
@@ -51,6 +52,8 @@ namespace MediaTekDocuments.view
             this.cbxComLivresSuivi = new System.Windows.Forms.ComboBox();
             this.txbComDvdNum = new System.Windows.Forms.TextBox();
             this.lblComDvdInfos = new System.Windows.Forms.Label();
+            this.dgvCommandesLivresListe = new System.Windows.Forms.DataGridView();
+            this.bdgCommandesLivresListe = new System.Windows.Forms.BindingSource();
             this.dgvComDvd = new System.Windows.Forms.DataGridView();
             this.grpComDvdSaisie = new System.Windows.Forms.GroupBox();
             this.txbComDvdMontant = new System.Windows.Forms.TextBox();
@@ -693,6 +696,11 @@ namespace MediaTekDocuments.view
             this.dgvLivresListe.TabIndex = 4;
             this.dgvLivresListe.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvLivresListe_ColumnHeaderMouseClick);
             this.dgvLivresListe.SelectionChanged += new System.EventHandler(this.DgvLivresListe_SelectionChanged);
+
+
+            this.dgvCommandesLivresListe.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvCommandesLivresListe.Name = "dgvCommandesLivresListe";
+            this.tabCommandesLivres.Controls.Add(this.dgvCommandesLivresListe);
             // 
             // label6
             // 
@@ -1929,6 +1937,8 @@ namespace MediaTekDocuments.view
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.GroupBox grpLivresRecherche;
         private System.Windows.Forms.DataGridView dgvLivresListe;
+        private System.Windows.Forms.DataGridView dgvCommandesLivresListe;
+        private System.Windows.Forms.BindingSource bdgCommandesLivresListe;
         private System.Windows.Forms.TabPage tabReceptionRevue;
         private System.Windows.Forms.GroupBox grpReceptionExemplaire;
         private System.Windows.Forms.Button btnReceptionExemplaireValider;

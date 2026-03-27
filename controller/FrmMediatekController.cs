@@ -67,6 +67,9 @@ namespace MediaTekDocuments.controller
 
         #region Gestion des Commandes
         public List<CommandeDocument> GetCommandesDocument(string idDocument) => access.GetCommandesDocument(idDocument);
+        public List<CommandeDocument> GetAllCommandesLivres() => access.GetAllCommandesLivres();
+        public List<CommandeDocument> GetAllCommandesDvd() => access.GetAllCommandesDvd();
+        public List<CommandeDocument> GetAllCommandesRevues() => access.GetAllCommandesRevues();
         public bool CreerCommandeDocument(CommandeDocument commandeDocument) => access.CreerEntite<CommandeDocument>("commandedocument", commandeDocument);
         public bool ModifierCommandeDocument(CommandeDocument commandeDocument) => access.ModifierEntite<CommandeDocument>("commandedocument", commandeDocument);
         public bool SupprimerCommandeDocument(CommandeDocument commandeDocument) => access.SupprimerEntite<CommandeDocument>("commandedocument", commandeDocument);

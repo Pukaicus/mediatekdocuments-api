@@ -2,17 +2,17 @@ namespace MediaTekDocuments.model
 {
     public class Utilisateur
     {
-        public int Id { get; set; }
-        public string Login { get; set; }
-        public string Pwd { get; set; }
-        public string Service { get; set; }
+        public int id { get; set; }
+        public string login { get; set; }
+        public string pwd { get; set; }
+        public string idservice { get; set; }
 
-        public Utilisateur(int id, string login, string pwd, string service)
+        public Utilisateur(int id, string login, string pwd, string idservice)
         {
-            this.Id = id;
-            this.Login = login;
-            this.Pwd = pwd;
-            this.Service = service;
+            this.id = id;
+            this.login = login;
+            this.pwd = pwd;
+            this.idservice = idservice;
         }
     }
 }

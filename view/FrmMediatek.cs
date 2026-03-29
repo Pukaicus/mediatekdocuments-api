@@ -585,9 +585,8 @@ namespace MediaTekDocuments.view
                 return; 
             }
 
-            MessageBox.Show("Le service reçu est : '" + utilisateur.Service + "'");
-
-            if (utilisateur.Service == "Prêts")
+            
+            if (utilisateur.idservice == "1")
             {
                 tabCommandesLivres.Visible = false;
                 tabCommandesDvd.Visible = false;
@@ -596,14 +595,14 @@ namespace MediaTekDocuments.view
                 btnLivresExemplairesSuppr.Enabled = false;
             }
 
-            if (utilisateur.Service == "Administratif")
+            if (utilisateur.idservice == "2")
             {
                 AlerteFinAbonnements();
             }
 
-            if (utilisateur.Service == "Culture")
+            if (utilisateur.idservice == "3")
             {   
-                MessageBox.Show("Accès refusé");
+                MessageBox.Show("Accès refusé pour ce service.");
                 Application.Exit();
             }
         }
@@ -638,33 +637,45 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Remplit le dategrid avec la liste reçue en paramètre
+        /// Remplit le dgv des livres avec la liste reçue en paramètre
         /// </summary>
-        /// <param name="livres">liste de livres</param>
-        /// <summary>
-        /// Remplit le DataGridView avec la liste des livres
-        /// </summary>
-        /// <param name="livres">Liste des livres à afficher</param>
+        /// <param name="livres">Liste de livres</param>
         private void RemplirLivresListe(List<Livre> livres)
         {
-            if (bdgLivresListe != null && livres != null)
+            if (livres == null || bdgLivresListe == null || dgvLivresListe == null)
+            {
+                return;
+            }
+
+            try 
             {
                 bdgLivresListe.DataSource = livres;
                 dgvLivresListe.DataSource = bdgLivresListe;
 
-                if (livres.Count > 0)
+                if (livres.Count > 0 && dgvLivresListe.Columns.Count > 0)
                 {
-                    dgvLivresListe.Columns["isbn"].Visible = false;
-                    dgvLivresListe.Columns["idRayon"].Visible = false;
-                    dgvLivresListe.Columns["idGenre"].Visible = false;
-                    dgvLivresListe.Columns["idPublic"].Visible = false;
-                    dgvLivresListe.Columns["image"].Visible = false;
+                    string[] cols = { "isbn", "idRayon", "idGenre", "idPublic", "image", "Isbn", "IdRayon", "IdGenre", "IdPublic", "Image" };
                     
+                    foreach (string c in cols)
+                    {
+                        if (dgvLivresListe.Columns.Contains(c)) 
+                        {
+                            dgvLivresListe.Columns[c].Visible = false;
+                        }
+                    }
+
                     dgvLivresListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+                    if (dgvLivresListe.Columns.Contains("id")) dgvLivresListe.Columns["id"].DisplayIndex = 0;
+                    if (dgvLivresListe.Columns.Contains("Id")) dgvLivresListe.Columns["Id"].DisplayIndex = 0;
                     
-                    dgvLivresListe.Columns["id"].DisplayIndex = 0;
-                    dgvLivresListe.Columns["titre"].DisplayIndex = 1;
+                    if (dgvLivresListe.Columns.Contains("titre")) dgvLivresListe.Columns["titre"].DisplayIndex = 1;
+                    if (dgvLivresListe.Columns.Contains("Titre")) dgvLivresListe.Columns["Titre"].DisplayIndex = 1;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors du remplissage du tableau : " + ex.Message);
             }
         }
 

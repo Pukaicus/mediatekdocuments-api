@@ -257,9 +257,9 @@ namespace MediaTekDocuments.view
             this.tabOngletsApplication.Controls.Add(this.tabDvd);
             this.tabOngletsApplication.Controls.Add(this.tabRevues);
             this.tabOngletsApplication.Controls.Add(this.tabReceptionRevue);
-            this.tabOngletsApplication.Controls.Add(this.tabCommandesLivres);
-            this.tabOngletsApplication.Controls.Add(this.tabCommandesDvd);
-            this.tabOngletsApplication.Controls.Add(this.tabCommandesRevues);
+            ///this.tabOngletsApplication.Controls.Add(this.tabCommandesLivres);
+            ///this.tabOngletsApplication.Controls.Add(this.tabCommandesDvd);
+            ///this.tabOngletsApplication.Controls.Add(this.tabCommandesRevues);
             this.tabOngletsApplication.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabOngletsApplication.ItemSize = new System.Drawing.Size(49, 18);
             this.tabOngletsApplication.Location = new System.Drawing.Point(0, 0);
@@ -690,6 +690,7 @@ namespace MediaTekDocuments.view
             this.dgvLivresListe.MultiSelect = false;
             this.dgvLivresListe.Name = "dgvLivresListe";
             this.dgvLivresListe.ReadOnly = true;
+            this.dgvLivresListe.Visible = true;
             this.dgvLivresListe.RowHeadersVisible = false;
             this.dgvLivresListe.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvLivresListe.Size = new System.Drawing.Size(844, 200);

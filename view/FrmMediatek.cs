@@ -53,16 +53,26 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Se déclenche à l'ouverture du formulaire
+        /// Se déclenche à l'ouverture du formulaire pour remplir les listes et les tableaux
         /// </summary>
         private void FrmMediatek_Load(object sender, EventArgs e)
         {
+            if (!tabLivres.Controls.Contains(dgvLivresListe))
+            {
+                tabLivres.Controls.Add(dgvLivresListe);
+            }
+
+            dgvLivresListe.Location = new System.Drawing.Point(20, 150); 
+            dgvLivresListe.Size = new System.Drawing.Size(750, 250);
+            dgvLivresListe.Visible = true;
+            dgvLivresListe.BringToFront();
+
             RemplirCombo(controller.GetAllGenres(), cbxLivresGenres, true);
             RemplirCombo(controller.GetAllPublics(), cbxLivresPublics, true);
             RemplirCombo(controller.GetAllRayons(), cbxLivresRayons, true);
-
-            RemplirLivresListe(controller.GetAllLivres());
             
+            RemplirLivresListe(controller.GetAllLivres());
+
             RemplirCombo(controller.GetAllGenres(), cbxDvdGenres, true);
             RemplirCombo(controller.GetAllPublics(), cbxDvdPublics, true);
             RemplirCombo(controller.GetAllRayons(), cbxDvdRayons, true);
@@ -91,12 +101,9 @@ namespace MediaTekDocuments.view
                 ReadOnly = true,
                 AllowUserToAddRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoGenerateColumns = true 
             };
-            dgvComLivres.Columns.Add("Date", "Date");
-            dgvComLivres.Columns.Add(STR_MONTANT, STR_MONTANT);
-            dgvComLivres.Columns.Add("Quantite", "Quantité");
-            dgvComLivres.Columns.Add(STR_SUIVI, STR_SUIVI);
 
             grpComLivresSaisie = new GroupBox { Text = "Gestion de la commande", Location = new System.Drawing.Point(500, 60), Size = new System.Drawing.Size(280, 300) };
             
@@ -133,48 +140,80 @@ namespace MediaTekDocuments.view
             tabCommandesLivres.Controls.Add(lblComLivresInfos);
             tabCommandesLivres.Controls.Add(dgvComLivres);
             tabCommandesLivres.Controls.Add(grpComLivresSaisie);
+            dgvComLivres.BringToFront();
         }
 
         /// <summary>
-        /// Les commandes et les infos du livre
+        /// Charge les commandes et les infos du livre dans l'onglet des commandes
         /// </summary>
+        /// <param name="idLivre">Identifiant du livre à rechercher</param>
         private void ChargerCommandesLivre(string idLivre)
         {
+            dgvComLivres.DataSource = null;
+
             Livre leLivre = controller.GetLivre(idLivre);
+
             if (leLivre != null)
             {
-                lblComLivresInfos.Text = $"Livre : {leLivre.Titre} - {leLivre.Auteur}";
+                lblComLivresInfos.Text = "Livre : " + leLivre.Titre + " - " + leLivre.Auteur;
                 
                 List<CommandeDocument> lesCommandes = controller.GetCommandesDocument(idLivre);
                 
+                dgvComLivres.AutoGenerateColumns = true;
                 dgvComLivres.DataSource = lesCommandes;
+                
+                if (lesCommandes != null && lesCommandes.Count > 0)
+                {
+                    dgvComLivres.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                }
+                
+                dgvComLivres.Refresh();
             }
             else
             {
-                MessageBox.Show("Numéro de livre introuvable.");
+                MessageBox.Show("Numéro de livre " + idLivre + " introuvable.");
                 lblComLivresInfos.Text = STR_INFO + "livre : ";
-                dgvComLivres.DataSource = null;
             }
         }
 
         /// <summary>
-        /// Enregistre une nouvelle commande de livre
+        /// Enregistre une nouvelle commande de livre avec un ID unique
         /// </summary>
         private void EnregistrerNouvelleCommande()
         {
-            string idDocument = txbComLivresNum.Text;
-            double montant = double.Parse(txbComLivresMontant.Text);
-            int nbExemplaires = (int)nudComLivresQuantite.Value;
-            
-            CommandeDocument uneCommande = new CommandeDocument(idDocument, DateTime.Now, montant, nbExemplaires, idDocument, "001", "En cours");
-            if (controller.CreerCommandeDocument(uneCommande))
+            try
             {
-                MessageBox.Show("Commande enregistrée avec succès.");
-                ChargerCommandesLivre(idDocument);
+                string idDocument = txbComLivresNum.Text.Trim();
+                if (string.IsNullOrEmpty(idDocument))
+                {
+                    MessageBox.Show("Veuillez saisir un numéro de livre.");
+                    return;
+                }
+
+                double montant = double.Parse(txbComLivresMontant.Text);
+                int nbExemplaires = (int)nudComLivresQuantite.Value;
+
+                string idCommandeUnique = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+                CommandeDocument uneCommande = new CommandeDocument(idCommandeUnique, DateTime.Now, montant, nbExemplaires, idDocument, "1", "En cours");
+
+                if (controller.CreerCommandeDocument(uneCommande))
+                {
+                    MessageBox.Show("Commande enregistrée avec succès.");
+
+                    txbComLivresMontant.Text = "";
+                    nudComLivresQuantite.Value = 1;
+
+                    ChargerCommandesLivre(idDocument);
+                }
+                else
+                {
+                    MessageBox.Show("Erreur : L'enregistrement a été refusé par la base de données. Vérifiez l'ID de suivi dans WAMP.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Erreur lors de l'enregistrement.");
+                MessageBox.Show("Erreur de saisie : Vérifiez le format du montant. " + ex.Message);
             }
         }
 
@@ -300,23 +339,36 @@ namespace MediaTekDocuments.view
             tabCommandesDvd.Controls.Add(lblComDvdInfos);
             tabCommandesDvd.Controls.Add(dgvComDvd);
             tabCommandesDvd.Controls.Add(grpComDvdSaisie);
+            tabCommandesDvd.Controls.Add(dgvComDvd);
+            dgvComDvd.BringToFront();
         }
 
         /// <summary>
-        /// Les commandes et les infos du DVD
+        /// Charge les commandes et les infos du DVD dans l'onglet des commandes
         /// </summary>
+        /// <param name="idDvd">Identifiant du DVD à rechercher</param>
         private void ChargerCommandesDvd(string idDvd)
         {
             Dvd leDvd = controller.GetDvd(idDvd);
+
             if (leDvd != null)
             {
-                lblComDvdInfos.Text = $"DVD : {leDvd.Titre} - {leDvd.Realisateur}";
+                lblComDvdInfos.Text = "DVD : " + leDvd.Titre + " - " + leDvd.Realisateur;
+                
                 List<CommandeDocument> lesCommandes = controller.GetCommandesDocument(idDvd);
+                
+                dgvComDvd.DataSource = null;
                 dgvComDvd.DataSource = lesCommandes;
+
+                if (lesCommandes != null && lesCommandes.Count > 0)
+                {
+                    dgvComDvd.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                }
             }
             else
             {
                 MessageBox.Show("Numéro de DVD introuvable.");
+                lblComDvdInfos.Text = STR_INFO + "DVD : ";
                 dgvComDvd.DataSource = null;
             }
         }
@@ -432,21 +484,32 @@ namespace MediaTekDocuments.view
             tabCommandesRevues.Controls.Add(lblComRevuesInfos);
             tabCommandesRevues.Controls.Add(dgvComRevues);
             tabCommandesRevues.Controls.Add(grpComRevuesSaisie);
+            tabCommandesRevues.Controls.Add(dgvComRevues);
+            dgvComRevues.BringToFront();
         }
 
         /// <summary>
-        /// Charge les abonnements d'une revue
+        /// Charge les abonnements d'une revue dans l'onglet des commandes
         /// </summary>
+        /// <param name="idRevue">Identifiant de la revue à rechercher</param>
         private void ChargerCommandesRevue(string idRevue)
         {
+            // Récupération des informations de la revue via le contrôleur
             Revue laRevue = controller.GetRevue(idRevue);
+
             if (laRevue != null)
             {
-                lblComRevuesInfos.Text = $"Revue : {laRevue.Titre} - Editeur : {laRevue.Editeur}";
+                lblComRevuesInfos.Text = "Revue : " + laRevue.Titre + " - Editeur : " + laRevue.Editeur;
                 
                 List<Abonnement> lesAbonnements = controller.GetAbonnements(idRevue);
                 
+                dgvComRevues.DataSource = null;
                 dgvComRevues.DataSource = lesAbonnements;
+
+                if (lesAbonnements != null && lesAbonnements.Count > 0)
+                {
+                    dgvComRevues.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                }
             }
             else
             {
@@ -642,42 +705,45 @@ namespace MediaTekDocuments.view
         /// <param name="livres">Liste de livres</param>
         private void RemplirLivresListe(List<Livre> livres)
         {
-            if (livres == null || bdgLivresListe == null || dgvLivresListe == null)
-            {
-                return;
-            }
+            if (bdgLivresListe == null || dgvLivresListe == null) return; 
 
             try 
             {
-                bdgLivresListe.DataSource = livres;
-                dgvLivresListe.DataSource = bdgLivresListe;
-
-                if (livres.Count > 0 && dgvLivresListe.Columns.Count > 0)
+                if (!tabLivres.Controls.Contains(dgvLivresListe))
                 {
-                    string[] cols = { "isbn", "idRayon", "idGenre", "idPublic", "image", "Isbn", "IdRayon", "IdGenre", "IdPublic", "Image" };
-                    
-                    foreach (string c in cols)
+                    tabLivres.Controls.Add(dgvLivresListe); 
+                }
+
+                bdgLivresListe.DataSource = null; 
+                bdgLivresListe.DataSource = livres; 
+                dgvLivresListe.DataSource = bdgLivresListe;
+                dgvLivresListe.Location = new Point(10, 140); 
+                dgvLivresListe.Size = new Size(855, 230);
+                dgvLivresListe.Visible = true; 
+                dgvLivresListe.BringToFront();
+
+                if (livres != null && livres.Count > 0) 
+                {
+                    string[] aCacher = { "isbn", "idRayon", "idGenre", "idPublic", "image", "Isbn", "IdRayon", "IdGenre", "IdPublic", "Image" }; 
+                    foreach (string nom in aCacher)
                     {
-                        if (dgvLivresListe.Columns.Contains(c)) 
+                        if (dgvLivresListe.Columns.Contains(nom)) 
                         {
-                            dgvLivresListe.Columns[c].Visible = false;
+                            dgvLivresListe.Columns[nom].Visible = false; 
                         }
                     }
-
-                    dgvLivresListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-
-                    if (dgvLivresListe.Columns.Contains("id")) dgvLivresListe.Columns["id"].DisplayIndex = 0;
-                    if (dgvLivresListe.Columns.Contains("Id")) dgvLivresListe.Columns["Id"].DisplayIndex = 0;
-                    
-                    if (dgvLivresListe.Columns.Contains("titre")) dgvLivresListe.Columns["titre"].DisplayIndex = 1;
-                    if (dgvLivresListe.Columns.Contains("Titre")) dgvLivresListe.Columns["Titre"].DisplayIndex = 1;
+                    dgvLivresListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; 
                 }
+                
+                dgvLivresListe.Update();
+                dgvLivresListe.Refresh();
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
-                Console.WriteLine("Erreur lors du remplissage du tableau : " + ex.Message);
+                Console.WriteLine("Erreur d'affichage : " + ex.Message);
             }
         }
+
 
         /// <summary>
         /// Événement lors de l'entrée dans l'onglet des parutions
@@ -1983,15 +2049,29 @@ namespace MediaTekDocuments.view
         /// <param name="exemplaires">liste d'exemplaires</param>
         private void RemplirReceptionExemplairesListe(List<Exemplaire> exemplaires)
         {
+            if (bdgExemplairesListe == null || dgvReceptionExemplairesListe == null)
+            {
+                return;
+            }
+
             if (exemplaires != null)
             {
                 bdgExemplairesListe.DataSource = exemplaires;
                 dgvReceptionExemplairesListe.DataSource = bdgExemplairesListe;
-                dgvReceptionExemplairesListe.Columns["idEtat"].Visible = false;
-                dgvReceptionExemplairesListe.Columns["id"].Visible = false;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("idEtat"))
+                    dgvReceptionExemplairesListe.Columns["idEtat"].Visible = false;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("id"))
+                    dgvReceptionExemplairesListe.Columns["id"].Visible = false;
+
                 dgvReceptionExemplairesListe.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-                dgvReceptionExemplairesListe.Columns["numero"].DisplayIndex = 0;
-                dgvReceptionExemplairesListe.Columns["dateAchat"].DisplayIndex = 1;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("numero"))
+                    dgvReceptionExemplairesListe.Columns["numero"].DisplayIndex = 0;
+
+                if (dgvReceptionExemplairesListe.Columns.Contains("dateAchat"))
+                    dgvReceptionExemplairesListe.Columns["dateAchat"].DisplayIndex = 1;
             }
             else
             {
@@ -2006,17 +2086,19 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnReceptionRechercher_Click(object sender, EventArgs e)
         {
-            if (!txbReceptionRevueNumero.Text.Equals(""))
+            string idDocument = txbReceptionRevueNumero.Text;
+            Revue laRevue = controller.GetRevue(idDocument);
+
+            if (laRevue != null)
             {
-                Revue revue = lesRevues.Find(x => x.Id.Equals(txbReceptionRevueNumero.Text));
-                if (revue != null)
-                {
-                    AfficheReceptionRevueInfos(revue);
-                }
-                else
-                {
-                    MessageBox.Show("numéro introuvable");
-                }
+                AfficheReceptionRevueInfos(laRevue);
+                List<Exemplaire> lesExemplaires = controller.GetExemplairesRevue(idDocument);
+                RemplirReceptionExemplairesListe(lesExemplaires);
+            }
+            else
+            {
+                MessageBox.Show("Numéro de revue introuvable.");
+                VideReceptionRevueInfos();
             }
         }
 
@@ -2041,12 +2123,11 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Affichage des informations de la revue sélectionnée et les exemplaires
+        /// Affiche les informations de la revue sélectionnée dans l'onglet parution
         /// </summary>
-        /// <param name="revue">la revue</param>
+        /// <param name="revue">L'objet Revue à afficher</param>
         private void AfficheReceptionRevueInfos(Revue revue)
         {
-            // informations sur la revue
             txbReceptionRevuePeriodicite.Text = revue.Periodicite;
             txbReceptionRevueImage.Text = revue.Image;
             txbReceptionRevueDelaiMiseADispo.Text = revue.DelaiMiseADispo.ToString();
@@ -2055,16 +2136,24 @@ namespace MediaTekDocuments.view
             txbReceptionRevuePublic.Text = revue.Public;
             txbReceptionRevueRayon.Text = revue.Rayon;
             txbReceptionRevueTitre.Text = revue.Titre;
-            string image = revue.Image;
+
+            string imagePath = revue.Image;
             try
             {
-                pcbReceptionRevueImage.Image = Image.FromFile(image);
+                if (!string.IsNullOrEmpty(imagePath))
+                {
+                    pcbReceptionRevueImage.Image = Image.FromFile(imagePath);
+                }
+                else
+                {
+                    pcbReceptionRevueImage.Image = null;
+                }
             }
             catch
             {
                 pcbReceptionRevueImage.Image = null;
             }
-            // affiche la liste des exemplaires de la revue
+
             AfficheReceptionExemplairesRevue();
         }
 
@@ -2263,6 +2352,28 @@ private void DeverrouillerChampsDvd()
             combo.DisplayMember = "Libelle";
             combo.ValueMember = "Id";
             combo.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Vide les zones d'affichage des informations de la revue
+        /// </summary>
+        private void VideReceptionRevueInfos()
+        {
+            txbReceptionRevueNumero.Text = ""; 
+            txbReceptionRevueTitre.Text = "";
+            txbReceptionRevuePeriodicite.Text = "";
+            txbReceptionRevueDelaiMiseADispo.Text = "";
+            txbReceptionRevueGenre.Text = "";
+            txbReceptionRevuePublic.Text = "";
+            txbReceptionRevueRayon.Text = "";
+            txbReceptionRevueImage.Text = "";
+            
+            pcbReceptionRevueImage.Image = null;
+
+            if (dgvReceptionExemplairesListe != null)
+            {
+                dgvReceptionExemplairesListe.DataSource = null;
+            }
         }
 
     }

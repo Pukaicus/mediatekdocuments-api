@@ -75,3 +75,25 @@ Ce mode opératoire permet d'installer l'application pour pouvoir travailler des
 - Installer Visual Studio 2019 entreprise et les extension Specflow et newtonsoft.json (pour ce dernier, voir l'article "Accéder à une API REST à partir d'une application C#" dans le wiki de ce dépôt : consulter juste le début pour la configuration, car la suite permet de comprendre le code existant).<br>
 - Télécharger le code et le dézipper puis renommer le dossier en "mediatekdocuments".<br>
 - Récupérer et installer l'API REST nécessaire (https://github.com/CNED-SLAM/rest_mediatekdocuments) ainsi que la base de données (les explications sont données dans le readme correspondant).
+
+--
+##  Évolutions apportées
+> **Note : Ce dépôt est une version étendue du dépôt d'origine du CNED (https://github.com/CNED-SLAM/MediaTekDocuments). Il contient les fonctionnalités de gestion des commandes et de sécurisation développées durant cet atelier.
+
+### Nouvelles Fonctionnalités
+#### Onglet 5 : Gestion des Commandes
+Cet onglet a été entièrement développé pour permettre aux services autorisés de passer des commandes de documents.
+- intuitive : Formulaire de création de commande avec génération automatique d'ID unique basé sur l'horodatage.
+- Calcul automatique : Gestion des quantités et des montants saisis.
+- Persistance : Enregistrement sécurisé dans la base de données via l'API REST.
+
+### Améliorations Techniques
+- Sécurisation de l'accès : Migration des paramètres de connexion vers une architecture distante.
+- Optimisation du DataBinding : Utilisation de `BindingSource` pour garantir la synchronisation en temps réel entre les objets métier et l'interface graphique, évitant les erreurs d'affichage lors des recherches.
+
+## Installation et Utilisation
+Pour utiliser cette version spécifique de l'application :
+   ```csharp
+   private static readonly string address = "";
+
+le code bin\Debug\MediaTekDocuments.exe
